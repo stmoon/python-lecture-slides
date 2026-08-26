@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Part 1-2 모듈과 패키지 만들기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;family=Atkinson+Hyperlegible:wght@400;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Noto+Sans+KR:wght@400;500;700;900&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./deck.css">
+<script defer="" src="./deck.js"></script>
+<script type="text/x-deck-preamble">
+import os, sys, shutil
+from pathlib import Path
+
+ROOT = Path("/home/pyodide/work")
+os.chdir("/")
+if ROOT.exists():
+    shutil.rmtree(ROOT)
+
+(ROOT / "src" / "sensorkit" / "filters").mkdir(parents=True)
+(ROOT / "src" / "mini").mkdir()
+(ROOT / "tests").mkdir()
+
+FILES = {
+    "src/mini/__init__.py": """__version__ = "0.1.0"
+""",
+    "src/mini/hello.py": """def greet(name="world"):
+    return f"hi, {name}"
+""",
+    "src/sensorkit/io.py": """import csv
+
+
+def load_csv(path):
+    \"\"\"Read a sensor log and return its rows as dicts.\"\"\"
+    with open(path, newline="") as f:
+        return list(csv.DictReader(f))
+
+
+def column(rows, name):
+    \"\"\"Pull one column out of loaded rows as floats.\"\"\"
+    return [float(r[name]) for r in rows if r.get(name) not in (None, "")]
+""",
+    "src/sensorkit/clean.py": """from .config import TEMP_RANGE_C
+
+
+def drop_outliers(values, lo, hi):
+    \"\"\"Return only the values inside [lo, hi].\"\"\"
+    return [v for v in values if lo <= v <= hi]
+
+
+def drop_temp_outliers(values):
+    return drop_outliers(values, *TEMP_RANGE_C)
+""",
+    "src/sensorkit/config.py": """G_M_PER_S2 = 9.80665
+TEMP_RANGE_C = (-20.0, 80.0)
+DEFAULT_WINDOW = 3
+""",
+    "src/sensorkit/errors.py": """class SensorError(Exception):
+    \"\"\"Base error for sensorkit.\"\"\"
+
+
+class SchemaError(SensorError):
+    \"\"\"A log is missing a required column.\"\"\"
+""",
+    "src/sensorkit/stats.py": """def mean(xs: list[float]) -> float:
+    \"\"\"Return the arithmetic mean of xs.\"\"\"
+    return sum(xs) / len(xs)
+""",
+    "src/sensorkit/filters/moving_average.py": """def moving_average(xs, n=3):
+    \"\"\"Return the moving average of xs over n samples.\"\"\"
+    return [sum(xs[i:i + n]) / n for i in range(len(xs) - n + 1)]
+""",
+    "src/sensorkit/filters/__init__.py": """from .moving_average import moving_average
+
+__all__ = ["moving_average"]
+""",
+    "src/sensorkit/__init__.py": """from .clean import drop_outliers, drop_temp_outliers
+from .errors import SchemaError, SensorError
+from .filters import moving_average
+from .io import column, load_csv
+from .stats import mean
+
+__all__ = [
+    "load_csv", "column", "drop_outliers", "drop_temp_outliers",
+    "moving_average", "mean", "SensorError", "SchemaError",
+]
+__version__ = "0.1.0"
+""",
+    "src/sensorkit/cli.py": """import sys
+from .io import column, load_csv
+from .stats import mean
+
+
+def main(argv=None):
+    \"\"\"Print the mean of one column. Returns an exit code.\"\"\"
+    argv = sys.argv[1:] if argv is None else argv
+    print(f"{argv[0]}: mean={mean(column(load_csv(argv[0]), 'temp')):.2f}")
+    return 0
+""",
+    "src/sensorkit/report.py": """import csv
+
+from .stats import mean
+
+DIGITS = 2
+
+
+def summarize(rows, col):
+    \"\"\"Return the rounded mean of one column.\"\"\"
+    return _round(mean([float(r[col]) for r in rows]))
+
+
+def _round(x):
+    return round(x, DIGITS)
+""",
+    "tests/test_filters.py": """from sensorkit import moving_average
+
+
+def test_moving_average():
+    assert moving_average([1, 2, 3], 2) == [1.5, 2.5]
+""",
+    "log.csv": """t,temp
+0.0,21.5
+0.1,21.6
+0.2,99.9
+0.3,21.4
+0.4,21.7
+""",
+}
+for name, body in FILES.items():
+    (ROOT / name).write_text(body)
+
+PUBLIC = {"load_csv", "column", "drop_outliers", "drop_temp_outliers",
+          "moving_average", "mean"}
+
+
+def check_public(names):
+    """Report what the given __all__ is missing or exposes by mistake."""
+    got = set(names)
+    missing, extra = sorted(PUBLIC - got), sorted(got - PUBLIC)
+    if not missing and not extra:
+        print("OK: 공개 API", len(got), "개")
+    else:
+        print("빠짐:", missing, "/ 불필요:", extra)
+
+
+def check_star(module, names, want={"summarize"}):
+    """Star-import the module under the given __all__ and report what leaks."""
+    module.__all__ = list(names)
+    ns = {}
+    exec(f"from {module.__name__} import *", ns)
+    got = {k for k in ns if not k.startswith("__")}
+    leak, missing = sorted(got - want), sorted(want - got)
+    if not leak and not missing:
+        print("OK: 공개", sorted(got))
+    else:
+        print("유출:", leak, "/ 빠짐:", missing)
+
+
+for name in [k for k in list(sys.modules) if k.split(".")[0] in ("sensorkit", "mini")]:
+    del sys.modules[name]
+src_path = str(ROOT / "src")
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
+os.chdir(ROOT)
+</script>
+<style>
+@page { size: 1920px 1080px; margin: 0; }
+html, body { margin: 0; padding: 0; background: #fff; }
+:root { color-scheme: light; }
+deck-stage { display: block; }
+.slide {
+  width: 1920px; height: 1080px; overflow: hidden; box-sizing: border-box;
+  break-after: page; page-break-after: always;
+}
+.slide:last-child { break-after: auto; page-break-after: auto; }
+</style>
+</head>
+<body>
+<deck-stage>
+        <section class="slide cover" data-label="표지" data-screen-label="표지">
+          <img class="cover-logo" src="./cbnu_logo.png" alt="충북대학교">
+          <span class="cover-kicker">PYTHON 프로그래밍 · PART 1-2</span>
+          <h1 class="cover-title">모듈과 패키지 만들기</h1>
+          <p class="cover-sub">패키지 구조부터 설치와 배포까지</p>
+          <div class="cover-rule"></div>
+          <p class="cover-by">충북대학교 지능로봇공학과 <b>문성태 교수</b></p>
+        </section>
+
+        <section class="slide" data-label="01 목표" data-screen-label="01 목표">
+          <header class="head"><span class="kicker">Overview</span><span class="folio">01</span></header>
+          <h2 class="title">무엇을 만드는가</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">sensorkit 패키지 제작부터 설치까지</p>
+            <div class="cols3">
+              <div class="card soft" style="padding:22px 26px">
+                <h3 class="card-h sky">만들 것</h3>
+                <ul class="ul">
+                  <li><strong>패키지</strong> — sensorkit, 역할별 모듈로 나눈 코드</li>
+                  <li><strong>메타데이터</strong> — pyproject.toml 로 이름과 버전 선언</li>
+                  <li><strong>테스트</strong> — 동작을 지키는 검사 코드</li>
+                </ul>
+              </div>
+              <div class="card" style="padding:22px 26px">
+                <h3 class="card-h">거치는 단계</h3>
+                <ul class="ul">
+                  <li><strong>구조</strong> — 디렉터리와 __init__.py</li>
+                  <li><strong>공개 API</strong> — 밖에서 쓸 이름만 노출</li>
+                  <li><strong>설치</strong> — pip install -e . 로 어디서나 import</li>
+                </ul>
+              </div>
+              <div class="card good" style="padding:22px 26px">
+                <h3 class="card-h leaf">진행 방식</h3>
+                <ul class="ul">
+                  <li><strong>준비됨</strong> — 프로젝트 파일은 이미 존재</li>
+                  <li><strong>보기</strong> — 슬라이드에서 파일 내용 확인</li>
+                  <li><strong>작성</strong> — 연습문제에서 빈 함수만 채워 실행</li>
+                </ul>
+              </div>
+            </div>
+            <p class="note"><strong>끝나면</strong> — 다른 프로젝트에서 import 한 줄, 팀원이 같은 방법으로 설치</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:5%"></i></div><span class="foot-num">01 / 19</span></footer>
+        </section>
+
+        <section class="slide" data-label="02 레이아웃" data-screen-label="02 레이아웃">
+          <header class="head"><span class="kicker">Layout</span><span class="folio">02</span></header>
+          <h2 class="title">프로젝트 레이아웃</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <div class="card warn">
+                <h3 class="card-h coral">flat layout</h3>
+                <ul class="ul coral">
+                  <li><strong>구조</strong> — 프로젝트 루트에 패키지 폴더를 그대로</li>
+                  <li><strong>장점</strong> — 단순한 구조, 설치 없이 바로 import</li>
+                  <li><strong>함정</strong> — 설치 없이도 import 되어 설치 오류를 놓침</li>
+                </ul>
+              </div>
+              <div class="card good">
+                <h3 class="card-h leaf">src layout (권장)</h3>
+                <ul class="ul leaf">
+                  <li><strong>구조</strong> — src/ 아래에 패키지 배치</li>
+                  <li><strong>효과</strong> — 설치해야 import, 배포본과 같은 조건에서 시험</li>
+                  <li><strong>부수</strong> — tests 가 소스가 아닌 설치본을 검증</li>
+                </ul>
+              </div>
+            </div>
+            <p class="note"><strong>선택</strong> — 배포용 코드는 src layout, 이 파트는 src 기준</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:11%"></i></div><span class="foot-num">02 / 19</span></footer>
+        </section>
+
+        <section class="slide" data-label="03 최소 패키지" data-screen-label="03 최소 패키지">
+          <header class="head"><span class="kicker">Build</span><span class="folio">03</span></header>
+          <h2 class="title">최소 패키지 만들기</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">디렉터리 하나와 __init__.py 하나면 패키지</p>
+            <div class="cols">
+              <div class="fig-stack">
+                <pre class="code xs">src/mini/__init__.py
+    __version__ = <span class="s">"0.1.0"</span>
+
+src/mini/hello.py
+    <span class="k">def</span> greet(name=<span class="s">"world"</span>):
+        <span class="k">return</span> f<span class="s">"hi, {name}"</span></pre>
+                <pre data-run class="code xs"><span class="k">import</span> mini
+<span class="k">from</span> mini.hello <span class="k">import</span> greet
+
+mini.__version__, greet(<span class="s">"sensor"</span>)</pre>
+              </div>
+              <div class="run-slot">
+                <ul class="ul" style="gap:16px">
+                  <li><strong>최소 조건</strong> — 디렉터리 + __init__.py</li>
+                  <li><strong>모듈 추가</strong> — 그 디렉터리 안에 .py 파일 생성</li>
+                  <li><strong>경로</strong> — 상위 폴더가 sys.path 에 있어야 import 가능</li>
+                  <li><strong>확인</strong> — 버전과 함수가 모두 보이면 성공</li>
+                </ul>
+                <div data-run-out></div>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:16%"></i></div><span class="foot-num">03 / 19</span></footer>
+        </section>
+
+        <section class="slide" data-label="04 프로젝트 구조" data-screen-label="04 프로젝트 구조">
+          <header class="head"><span class="kicker">Build</span><span class="folio">04</span></header>
+          <h2 class="title">sensorkit 구조</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">이 파트에서 쓰는 프로젝트는 이미 준비되어 있음</p>
+            <div class="cols">
+              <div class="fig-stack">
+                <pre class="code xs">src/sensorkit/
+├── __init__.py    공개 API
+├── config.py      상수
+├── errors.py      예외 계층
+├── io.py, clean.py, stats.py
+├── cli.py         진입점
+└── filters/moving_average.py</pre>
+                <pre data-run class="code xs"><span class="k">from</span> pathlib <span class="k">import</span> Path
+
+d = Path(<span class="s">"src/sensorkit"</span>)
+<span class="fn">sorted</span>(p.name <span class="k">for</span> p <span class="k">in</span> d.rglob(<span class="s">"*.py"</span>))</pre>
+              </div>
+              <div class="run-slot">
+                <ul class="ul" style="gap:16px">
+                  <li><strong>io</strong> — 로그 읽기, 열 뽑기</li>
+                  <li><strong>clean</strong> — 범위 밖 값 제거</li>
+                  <li><strong>filters</strong> — 신호 처리</li>
+                  <li><strong>stats</strong> — 요약 통계</li>
+                </ul>
+                <div data-run-out></div>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:21%"></i></div><span class="foot-num">04 / 19</span></footer>
+        </section>
+
+        <section class="slide" data-label="05 공개 API" data-screen-label="05 공개 API">
+          <header class="head"><span class="kicker">Build</span><span class="folio">05</span></header>
+          <h2 class="title">공개 API 설계</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">__init__.py 는 패키지의 현관</p>
+            <div class="cols">
+              <div class="fig-stack">
+                <pre class="code xs"><span class="c"># src/sensorkit/__init__.py</span>
+<span class="k">from</span> .clean <span class="k">import</span> drop_outliers
+<span class="k">from</span> .filters <span class="k">import</span> moving_average
+<span class="k">from</span> .io <span class="k">import</span> column, load_csv
+
+__all__ = [<span class="s">"load_csv"</span>, <span class="s">"column"</span>,
+           <span class="s">"drop_outliers"</span>, <span class="s">"moving_average"</span>]</pre>
+                <pre data-run class="code xs"><span class="k">import</span> sensorkit
+
+sensorkit.__all__
+sensorkit.moving_average([<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>, <span class="no">4</span>], <span class="no">2</span>)</pre>
+              </div>
+              <div class="run-slot">
+                <ul class="ul" style="gap:16px">
+                  <li><strong>재노출</strong> — 내부 경로를 몰라도 사용 가능</li>
+                  <li><strong>__all__</strong> — 공개 이름 목록, 문서이자 약속</li>
+                  <li><strong>내부 이름</strong> — 앞에 _ 를 붙여 비공개 처리</li>
+                  <li><strong>주의</strong> — 무거운 작업은 import 지연의 원인</li>
+                </ul>
+                <div data-run-out></div>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:26%"></i></div><span class="foot-num">05 / 19</span></footer>
+        </section>
+
+        <section class="slide" data-label="06 모듈 분리" data-screen-label="06 모듈 분리">
+          <header class="head"><span class="kicker">Design</span><span class="folio">06</span></header>
+          <h2 class="title">모듈 분리 기준</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">역할이 다르면 파일 분리</p>
+            <div class="cols3">
+              <div class="card soft" style="padding:22px 26px">
+                <h3 class="card-h sky">역할별</h3>
+                <ul class="ul">
+                  <li><strong>io</strong> — 읽기와 쓰기</li>
+                  <li><strong>clean</strong> — 결측과 이상치 처리</li>
+                  <li><strong>filters</strong> — 신호 처리</li>
+                  <li><strong>stats</strong> — 요약 통계</li>
+                </ul>
+              </div>
+              <div class="card" style="padding:22px 26px">
+                <h3 class="card-h">나누는 신호</h3>
+                <ul class="ul">
+                  <li><strong>길이</strong> — 한 파일이 300줄 초과</li>
+                  <li><strong>이유</strong> — 수정 이유가 둘 이상</li>
+                  <li><strong>의존</strong> — 특정 함수만 무거운 패키지 사용</li>
+                </ul>
+              </div>
+              <div class="card good" style="padding:22px 26px">
+                <h3 class="card-h leaf">합치는 신호</h3>
+                <ul class="ul">
+                  <li><strong>동반 수정</strong> — 항상 함께 변경</li>
+                  <li><strong>한 줄 모듈</strong> — 파일 수만 증가</li>
+                  <li><strong>순환</strong> — 서로를 import</li>
+                </ul>
+              </div>
+            </div>
+            <p class="note"><strong>순서</strong> — 한 파일로 시작, 이유가 생겼을 때 분리</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:32%"></i></div><span class="foot-num">06 / 19</span></footer>
+        </section>
+
+        <section class="slide" data-label="07 서브패키지" data-screen-label="07 서브패키지">
+          <header class="head"><span class="kicker">Build</span><span class="folio">07</span></header>
+          <h2 class="title">서브패키지와 상대 import</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">패키지 안의 패키지도 같은 규칙</p>
+            <div class="cols">
+              <div class="fig-stack">
+                <pre class="code xs"><span class="c"># filters/__init__.py</span>
+<span class="k">from</span> .moving_average <span class="k">import</span> moving_average
+
+__all__ = [<span class="s">"moving_average"</span>]
+
+<span class="c"># filters/moving_average.py</span>
+<span class="k">def</span> moving_average(xs, n=<span class="no">3</span>):
+    ...</pre>
+                <pre data-run class="code xs"><span class="k">from</span> sensorkit.filters <span class="k">import</span> moving_average
+
+moving_average([<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>, <span class="no">4</span>, <span class="no">5</span>], <span class="no">3</span>)</pre>
+              </div>
+              <div class="run-slot">
+                <ul class="ul" style="gap:16px">
+                  <li><strong>중첩</strong> — filters/ 도 __init__.py 보유</li>
+                  <li><strong>상대 import</strong> — 패키지 안에서는 .moving_average</li>
+                  <li><strong>절대 import</strong> — 밖에서는 sensorkit.filters</li>
+                  <li><strong>규칙</strong> — 내부는 상대, 외부는 절대</li>
+                </ul>
+                <div data-run-out></div>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:37%"></i></div><span class="foot-num">07 / 19</span></footer>
+        </section>
+
+        <section class="slide" data-label="08 연습문제 1" data-screen-label="08 연습문제 1">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">08</span></header>
+          <h2 class="title">연습문제 1</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">report.py 의 __all__ 을 작성해 별표 import 로 summarize 만 공개되게 하시오.</p>
+            <div class="cols">
+              <div class="fig-stack">
+                <pre class="code xs"><span class="c"># src/sensorkit/report.py</span>
+<span class="k">import</span> csv
+<span class="k">from</span> .stats <span class="k">import</span> mean
+
+DIGITS = <span class="no">2</span>
+<span class="k">def</span> summarize(rows, col): ...
+<span class="k">def</span> _round(x): ...</pre>
+                <pre data-run class="code xs"><span class="k">from</span> sensorkit <span class="k">import</span> report
+<span class="c"># IMPLEMENT HERE</span>
+
+check_star(report, __all__)</pre>
+              </div>
+              <div class="run-slot" style="min-height:260px"><div data-run-out></div></div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:42%"></i></div><span class="foot-num">08 / 19</span></footer>
+        </section>
+
+        <section class="slide" data-label="09 문서화" data-screen-label="09 문서화">
+          <header class="head"><span class="kicker">Quality</span><span class="folio">09</span></header>
+          <h2 class="title">docstring과 타입 힌트</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">함수의 계약을 코드 안에 기록</p>
+            <div class="cols">
+              <div class="fig-stack">
+                <pre class="code xs"><span class="c"># src/sensorkit/stats.py</span>
+<span class="k">def</span> mean(xs: <span class="fn">list</span>[float]) -&gt; float:
+    <span class="s">""</span><span class="s">"Return the arithmetic mean of xs."</span><span class="s">""</span>
+    <span class="k">return</span> <span class="fn">sum</span>(xs) / <span class="fn">len</span>(xs)</pre>
+                <pre data-run class="code xs"><span class="k">from</span> sensorkit <span class="k">import</span> stats
+
+<span class="fn">help</span>(stats.mean)</pre>
+              </div>
+              <div class="run-slot">
+                <ul class="ul" style="gap:16px">
+                  <li><strong>docstring</strong> — 첫 줄은 한 문장 요약</li>
+                  <li><strong>타입 힌트</strong> — 입력과 출력 형태를 선언</li>
+                  <li><strong>도구</strong> — help(), 자동완성, 타입 검사기가 참조</li>
+                  <li><strong>주석과 차이</strong> — docstring 은 실행 시에도 유지</li>
+                </ul>
+                <div data-run-out></div>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:47%"></i></div><span class="foot-num">09 / 19</span></footer>
+        </section>
+
+        <section class="slide" data-label="10 예외 설계" data-screen-label="10 예외 설계">
+          <header class="head"><span class="kicker">Quality</span><span class="folio">10</span></header>
+          <h2 class="title">예외 설계</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">실패는 이름을 붙여 알림, 조용히 넘기지 않음</p>
+            <div class="cols">
+              <div class="fig-stack">
+                <pre class="code xs"><span class="c"># src/sensorkit/errors.py</span>
+<span class="k">class</span> SensorError(Exception):
+    <span class="s">""</span><span class="s">"Base error for sensorkit."</span><span class="s">""</span>
+
+<span class="k">class</span> SchemaError(SensorError):
+    ...</pre>
+                <pre data-run class="code xs"><span class="k">from</span> sensorkit <span class="k">import</span> SchemaError, SensorError
+<span class="k">try</span>:
+    <span class="k">raise</span> SchemaError(<span class="s">"missing: temp"</span>)
+<span class="k">except</span> SensorError <span class="k">as</span> err:
+    <span class="fn">print</span>(<span class="fn">type</span>(err).__name__, err)</pre>
+              </div>
+              <div class="run-slot">
+                <ul class="ul" style="gap:16px">
+                  <li><strong>기반 예외</strong> — 패키지마다 최상위 예외 하나</li>
+                  <li><strong>계층</strong> — 세부 예외는 그것을 상속</li>
+                  <li><strong>메시지</strong> — 무엇이 왜 잘못됐는지, 값까지</li>
+                  <li><strong>금지</strong> — except: pass 로 예외 삼키기</li>
+                </ul>
+                <div data-run-out></div>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:53%"></i></div><span class="foot-num">10 / 19</span></footer>
+        </section>
+
+        <section class="slide" data-label="11 설정과 상수" data-screen-label="11 설정과 상수">
+          <header class="head"><span class="kicker">Quality</span><span class="folio">11</span></header>
+          <h2 class="title">설정과 상수 관리</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">흩어진 값은 고칠 수 없음</p>
+            <div class="cols">
+              <div class="fig-stack">
+                <pre class="code xs"><span class="c"># src/sensorkit/config.py</span>
+G_M_PER_S2 = <span class="no">9.80665</span>
+TEMP_RANGE_C = (-<span class="no">20.0</span>, <span class="no">80.0</span>)
+DEFAULT_WINDOW = <span class="no">3</span></pre>
+                <pre data-run class="code xs"><span class="k">from</span> sensorkit <span class="k">import</span> config
+
+config.G_M_PER_S2, config.TEMP_RANGE_C</pre>
+              </div>
+              <div class="run-slot">
+                <ul class="ul" style="gap:16px">
+                  <li><strong>한 곳</strong> — 상수는 config 모듈에 집중</li>
+                  <li><strong>이름</strong> — 대문자 표기, 단위를 이름에 명시</li>
+                  <li><strong>환경별 값</strong> — 경로와 키는 환경변수로 주입</li>
+                  <li><strong>금지</strong> — 함수 안에 숫자를 직접 넣기</li>
+                </ul>
+                <div data-run-out></div>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:58%"></i></div><span class="foot-num">11 / 19</span></footer>
+        </section>
+
+        <section class="slide" data-label="12 연습문제 2" data-screen-label="12 연습문제 2">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">12</span></header>
+          <h2 class="title">연습문제 2</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">moving_average 를 세 가지 경로로 가져오시오. 패키지 최상위, 서브패키지, 모듈 각각에서 a, b, c 에 담는다. 셋이 같은 객체이면 True.</p>
+            <div class="cols">
+              <pre data-run class="code xs"><span class="c"># IMPLEMENT HERE</span>
+
+a is b is c</pre>
+              <div class="run-slot" style="min-height:260px"><div data-run-out></div></div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:63%"></i></div><span class="foot-num">12 / 19</span></footer>
+        </section>
+
+        <section class="slide" data-label="13 pyproject" data-screen-label="13 pyproject">
+          <header class="head"><span class="kicker">Packaging</span><span class="folio">13</span></header>
+          <h2 class="title">pyproject.toml 이란</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">패키지의 신분증이자 빌드 설명서</p>
+            <div class="cols">
+              <div class="fig-stack">
+                <pre class="code xs">[build-system]
+requires = [<span class="s">"setuptools&gt;=68"</span>]
+build-backend = <span class="s">"setuptools.build_meta"</span>
+
+[project]
+name = <span class="s">"sensorkit"</span>
+version = <span class="s">"0.1.0"</span>
+requires-python = <span class="s">"&gt;=3.10"</span>
+
+[project.scripts]
+sensorkit = <span class="s">"sensorkit.cli:main"</span></pre>
+              </div>
+              <div class="run-slot">
+                <ul class="ul" style="gap:16px">
+                  <li><strong>표준</strong> — PEP 621, setup.py 대체</li>
+                  <li><strong>build-system</strong> — 무엇으로 빌드할지</li>
+                  <li><strong>project</strong> — 이름, 버전, 의존성, 요구 버전</li>
+                  <li><strong>scripts</strong> — 설치 시 만들어질 명령</li>
+                </ul>
+                <div data-run-out></div>
+              </div>
+            </div>
+            <p class="note"><strong>이름 규칙</strong> — PyPI 이름은 전역, 흔한 단어는 이미 선점</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:68%"></i></div><span class="foot-num">13 / 19</span></footer>
+        </section>
+
+        <section class="slide" data-label="14 설치" data-screen-label="14 설치">
+          <header class="head"><span class="kicker">Packaging</span><span class="folio">14</span></header>
+          <h2 class="title">로컬 설치와 빌드</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <div class="card soft">
+                <h3 class="card-h sky">개발 중</h3>
+                <ul class="ul">
+                  <li><strong>pip install -e .</strong> — 편집 가능 설치</li>
+                  <li><strong>효과</strong> — 소스 수정 즉시 반영</li>
+                  <li><strong>확인</strong> — 다른 디렉터리에서 import 시도</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3 class="card-h">배포할 때</h3>
+                <ul class="ul">
+                  <li><strong>python -m build</strong> — sdist 와 wheel 생성</li>
+                  <li><strong>sdist</strong> — 소스 묶음(.tar.gz)</li>
+                  <li><strong>wheel</strong> — 설치용 미리 빌드본(.whl)</li>
+                  <li><strong>twine upload</strong> — TestPyPI 에 선행 업로드</li>
+                </ul>
+              </div>
+            </div>
+            <p class="note"><strong>버전</strong> — 시맨틱 버저닝, 호환 깨짐 MAJOR, 기능 추가 MINOR, 수정 PATCH</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:74%"></i></div><span class="foot-num">14 / 19</span></footer>
+        </section>
+
+        <section class="slide" data-label="15 테스트 배치" data-screen-label="15 테스트 배치">
+          <header class="head"><span class="kicker">Testing</span><span class="folio">15</span></header>
+          <h2 class="title">테스트 배치</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">테스트는 소스 밖에, 설치된 패키지를 대상으로</p>
+            <div class="cols">
+              <div class="fig-stack">
+                <pre class="code xs"><span class="c"># tests/test_filters.py</span>
+<span class="k">from</span> sensorkit <span class="k">import</span> moving_average <span class="k">as</span> ma
+
+
+<span class="k">def</span> test_moving_average():
+    <span class="k">assert</span> ma([<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>], <span class="no">2</span>) == [<span class="no">1.5</span>, <span class="no">2.5</span>]</pre>
+                <pre data-run class="code xs"><span class="k">from</span> sensorkit <span class="k">import</span> moving_average
+
+<span class="k">assert</span> moving_average([<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>], <span class="no">2</span>) == [<span class="no">1.5</span>, <span class="no">2.5</span>]
+<span class="k">assert</span> moving_average([<span class="no">1</span>], <span class="no">3</span>) == []
+<span class="fn">print</span>(<span class="s">"2 passed"</span>)</pre>
+              </div>
+              <div class="run-slot">
+                <ul class="ul" style="gap:16px">
+                  <li><strong>위치</strong> — 프로젝트 루트의 tests/</li>
+                  <li><strong>이름</strong> — 파일은 test_, 함수도 test_ 로 시작</li>
+                  <li><strong>실행</strong> — 루트에서 pytest 한 줄</li>
+                  <li><strong>import</strong> — 상대 경로가 아닌 설치된 이름으로</li>
+                </ul>
+                <div data-run-out></div>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:79%"></i></div><span class="foot-num">15 / 19</span></footer>
+        </section>
+
+        <section class="slide" data-label="16 연습문제 3" data-screen-label="16 연습문제 3">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">16</span></header>
+          <h2 class="title">연습문제 3</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">cli.py 의 main 을 작성하시오. argv 의 첫 인자를 경로로 받아 temp 열의 평균을 출력하고 종료 코드 0 을 돌려준다. 마지막 줄이 0 이면 규약을 지킨 것이다.</p>
+            <div class="cols">
+              <pre data-run class="code xs"><span class="k">import</span> sensorkit <span class="k">as</span> sk
+
+
+<span class="k">def</span> main(argv=<span class="k">None</span>):
+    <span class="c"># IMPLEMENT HERE</span>
+    ...
+
+main([<span class="s">"log.csv"</span>])</pre>
+              <div class="run-slot" style="min-height:260px"><div data-run-out></div></div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:84%"></i></div><span class="foot-num">16 / 19</span></footer>
+        </section>
+
+        <section class="slide" data-label="17 CLI 등록" data-screen-label="17 CLI 등록">
+          <header class="head"><span class="kicker">Packaging</span><span class="folio">17</span></header>
+          <h2 class="title">명령으로 등록하기</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">설치하면 생기는 터미널 명령</p>
+            <div class="cols">
+              <div class="fig-stack">
+                <pre class="code xs"><span class="c"># src/sensorkit/cli.py</span>
+<span class="k">def</span> main(argv=<span class="k">None</span>):
+    argv = sys.argv[<span class="no">1</span>:] <span class="k">if</span> argv is <span class="k">None</span> <span class="k">else</span> argv
+    rows = load_csv(argv[<span class="no">0</span>])
+    <span class="fn">print</span>(mean(column(rows, <span class="s">"temp"</span>)))
+    <span class="k">return</span> <span class="no">0</span></pre>
+                <pre data-run class="code xs"><span class="k">from</span> sensorkit <span class="k">import</span> cli
+
+cli.main([<span class="s">"log.csv"</span>])</pre>
+              </div>
+              <div class="run-slot">
+                <ul class="ul" style="gap:16px">
+                  <li><strong>선언</strong> — [project.scripts] 에 이름 = 모듈:함수</li>
+                  <li><strong>예</strong> — sensorkit = "sensorkit.cli:main"</li>
+                  <li><strong>규칙</strong> — main() 은 종료 코드 반환</li>
+                  <li><strong>확인</strong> — 설치 후 터미널에서 이름만 입력</li>
+                </ul>
+                <div data-run-out></div>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:89%"></i></div><span class="foot-num">17 / 19</span></footer>
+        </section>
+
+        <section class="slide" data-label="18 흔한 실패" data-screen-label="18 흔한 실패">
+          <header class="head"><span class="kicker">Pitfalls</span><span class="folio">18</span></header>
+          <h2 class="title">흔한 실패 사례</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <div class="card warn">
+                <h3 class="card-h coral">이렇게 깨진다</h3>
+                <ul class="ul coral">
+                  <li><strong>순환 import</strong> — a 가 b 를, b 가 a 를 import</li>
+                  <li><strong>이름 충돌</strong> — 파일명이 표준 모듈과 동일</li>
+                  <li><strong>경로 의존</strong> — 실행 위치가 바뀌면 파일 탐색 실패</li>
+                  <li><strong>무거운 __init__</strong> — import 만 해도 몇 초</li>
+                </ul>
+              </div>
+              <div class="card good">
+                <h3 class="card-h leaf">이렇게 푼다</h3>
+                <ul class="ul leaf">
+                  <li><strong>공통 모듈</strong> — 양쪽이 쓰는 코드를 하위로 이동</li>
+                  <li><strong>이름 확인</strong> — random.py, json.py 같은 이름 금지</li>
+                  <li><strong>경로 기준</strong> — Path(__file__).parent 사용</li>
+                  <li><strong>지연 import</strong> — 함수 안에서 필요할 때 import</li>
+                </ul>
+              </div>
+            </div>
+            <p class="note"><strong>진단</strong> — sys.path 와 sys.modules 두 곳이면 대개 원인 파악</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:95%"></i></div><span class="foot-num">18 / 19</span></footer>
+        </section>
+
+        <section class="slide" data-label="19 정리" data-screen-label="19 정리">
+          <header class="head"><span class="kicker">Wrap Up</span><span class="folio">19</span></header>
+          <h2 class="title">정리</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols3">
+              <div class="card soft" style="padding:22px 26px">
+                <h3 class="card-h sky">구조</h3>
+                <ul class="ul">
+                  <li><strong>src layout</strong> — 설치해야 import 되게</li>
+                  <li><strong>__init__.py</strong> — 공개 API 만 노출</li>
+                  <li><strong>역할별 모듈</strong> — io, clean, filters, stats</li>
+                </ul>
+              </div>
+              <div class="card" style="padding:22px 26px">
+                <h3 class="card-h">품질</h3>
+                <ul class="ul">
+                  <li><strong>docstring</strong> — 계약을 코드에</li>
+                  <li><strong>예외</strong> — 패키지 최상위 예외부터</li>
+                  <li><strong>테스트</strong> — tests/ 에 assert 로</li>
+                </ul>
+              </div>
+              <div class="card good" style="padding:22px 26px">
+                <h3 class="card-h leaf">배포</h3>
+                <ul class="ul">
+                  <li><strong>pyproject.toml</strong> — 이름, 버전, 의존성</li>
+                  <li><strong>pip install -e .</strong> — 개발 중 설치</li>
+                  <li><strong>build, twine</strong> — 배포 산출물</li>
+                </ul>
+              </div>
+            </div>
+            <p class="lead sm">실습 lab01 — sensorkit 골격, 설치, 테스트, CLI 등록까지 직접 완성</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:100%"></i></div><span class="foot-num">19 / 19</span></footer>
+        </section>
+</deck-stage>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 828 260" width="828" height="260" font-family="sans-serif">
+<rect width="828" height="260" fill="#ffffff"/>
+<text x="16" y="18" font-size="24" fill="#1d4ed8" text-anchor="start" font-weight="700">Figure</text>
+<text x="96" y="18" font-size="20" fill="#475569" text-anchor="start" font-weight="400">그림 전체. 크기와 저장의 단위</text>
+<rect x="12" y="28" width="804" height="220" rx="16" fill="#f8fafc" stroke="#1d4ed8" stroke-width="3" stroke-dasharray="9 7"/>
+<text x="44" y="62" font-size="22" fill="#15803d" text-anchor="start" font-weight="700">Axes</text>
+<text x="112" y="62" font-size="19" fill="#475569" text-anchor="start" font-weight="400">그래프 한 칸. plot 의 주체</text>
+<rect x="44" y="72" width="380" height="148" rx="10" fill="#ffffff" stroke="#15803d" stroke-width="2"/>
+<line x1="98" y1="86" x2="98" y2="180" stroke="#0f172a" stroke-width="3" stroke-linecap="round"/>
+<line x1="98" y1="180" x2="402" y2="180" stroke="#0f172a" stroke-width="3" stroke-linecap="round"/>
+<line x1="124" y1="180" x2="124" y2="187" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+<line x1="198" y1="180" x2="198" y2="187" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+<line x1="272" y1="180" x2="272" y2="187" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+<line x1="346" y1="180" x2="346" y2="187" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+<line x1="91" y1="152" x2="98" y2="152" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+<line x1="91" y1="124" x2="98" y2="124" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+<line x1="91" y1="96" x2="98" y2="96" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+<polyline points="106.0,139.0 148.0,121.0 190.0,116.6 232.0,129.2 274.0,149.2 316.0,161.5 358.0,156.8 400.0,138.6" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linejoin="round"/>
+<circle cx="106.0" cy="139.0" r="4" fill="#7c3aed"/>
+<circle cx="190.0" cy="116.6" r="4" fill="#7c3aed"/>
+<circle cx="274.0" cy="149.2" r="4" fill="#7c3aed"/>
+<circle cx="358.0" cy="156.8" r="4" fill="#7c3aed"/>
+<text x="102" y="96" font-size="16" fill="#475569" text-anchor="start" font-weight="400" font-family="monospace">ax.set_title(...)</text>
+<text x="70" y="210" font-size="19" fill="#b45309" text-anchor="start" font-weight="700">Axis (x)</text>
+<text x="194" y="210" font-size="18" fill="#475569" text-anchor="start" font-weight="400">눈금, 범위, 라벨 담당</text>
+<text x="66" y="162" font-size="19" fill="#b45309" text-anchor="middle" font-weight="700" transform="rotate(-90 66 162)">Axis (y)</text>
+<line x1="238" y1="123.17026275462192" x2="284" y2="99.17026275462192" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-dasharray="5 5"/>
+<text x="290" y="97.17026275462192" font-size="19" fill="#7c3aed" text-anchor="start" font-weight="700">Artist</text>
+<text x="290" y="117.17026275462192" font-size="17" fill="#475569" text-anchor="start" font-weight="400">선, 점, 글자</text>
+<text x="466" y="62" font-size="22" fill="#15803d" text-anchor="start" font-weight="700">Axes</text>
+<text x="534" y="62" font-size="19" fill="#475569" text-anchor="start" font-weight="400">한 Figure 에 여러 개 배치 가능</text>
+<rect x="466" y="72" width="336" height="148" rx="10" fill="#ffffff" stroke="#15803d" stroke-width="2"/>
+<line x1="510" y1="86" x2="510" y2="180" stroke="#0f172a" stroke-width="3" stroke-linecap="round"/>
+<line x1="510" y1="180" x2="780" y2="180" stroke="#0f172a" stroke-width="3" stroke-linecap="round"/>
+<rect x="528" y="140" width="34" height="40" rx="4" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+<rect x="580" y="112" width="34" height="68" rx="4" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+<rect x="632" y="128" width="34" height="52" rx="4" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+<rect x="684" y="96" width="34" height="84" rx="4" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+<rect x="736" y="150" width="34" height="30" rx="4" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+<text x="516" y="210" font-size="18" fill="#475569" text-anchor="start" font-weight="400">같은 Figure, 다른 Axes</text>
+</svg>

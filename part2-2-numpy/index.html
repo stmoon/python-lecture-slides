@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Part 2-2 NumPy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;family=Atkinson+Hyperlegible:wght@400;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Noto+Sans+KR:wght@400;500;700;900&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./deck.css">
+<script defer="" src="./deck.js"></script>
+<script type="text/x-deck-preamble">
+import numpy as np
+rng = np.random.default_rng(42)
+</script>
+<style>
+@page { size: 1920px 1080px; margin: 0; }
+html, body { margin: 0; padding: 0; background: #fff; }
+:root { color-scheme: light; }
+deck-stage { display: block; }
+.slide {
+  width: 1920px; height: 1080px; overflow: hidden; box-sizing: border-box;
+  break-after: page; page-break-after: always;
+}
+.slide:last-child { break-after: auto; page-break-after: auto; }
+</style>
+<link rel="stylesheet" href="cde-layout.css"></head>
+<body>
+<deck-stage>
+        <section class="slide cover" data-label="표지" data-screen-label="표지">
+          <img class="cover-logo" src="./cbnu_logo.png" alt="충북대학교">
+          <span class="cover-kicker">PYTHON 프로그래밍 · PART 2-2</span>
+          <h1 class="cover-title">NumPy</h1>
+          <p class="cover-sub">다차원 배열 연산 및 행렬 제어</p>
+          <div class="cover-rule"></div>
+          <p class="cover-by">충북대학교 지능로봇공학과 <b>문성태 교수</b></p>
+        </section>
+
+        <section class="slide" data-label="01 NumPy 소개" data-screen-label="01 NumPy 소개">
+          <header class="head"><span class="kicker">Overview</span><span class="folio">01</span></header>
+          <h2 class="title">What is NumPy</h2>
+          <div class="rule"></div>
+          <div class="body" style="padding-bottom: 34px;">
+            <p class="lead">파이썬을 수치 계산 언어로 만든 라이브러리</p>
+            <div class="cols3">
+              <div class="card soft" style="padding:22px 26px">
+                <h3 class="card-h sky">Who</h3>
+                <ul class="ul">
+                  <li><strong>Travis Oliphant<br></strong>2005년 초판 공개</li>
+                  <li><strong>뿌리</strong> — Numeric(1995), Numarray(2001) 통합</li>
+                  <li><strong>지금</strong> — NumFOCUS 가 후원하는 커뮤니티 개발</li>
+                </ul>
+              </div>
+              <div class="card" style="padding:22px 26px">
+                <h3 class="card-h">Why</h3>
+                <ul class="ul">
+                  <li><strong>문제</strong>&nbsp;<br>파이썬 리스트는 크고 느리다</li>
+                  <li><strong>해법</strong>&nbsp;<br>연속 메모리에 담고 연산은 C 로</li>
+                  <li><strong>결과<br></strong>루프 없이 배열 전체를 한 번에 계산</li>
+                </ul>
+              </div>
+              <div class="card good" style="padding:22px 26px">
+                <h3 class="card-h leaf">Where</h3>
+                <ul class="ul leaf">
+                  <li><strong>기반<br></strong>SciPy, Pandas, scikit-learn, PyTorch</li>
+                  <li><strong>사례<br></strong>LIGO 중력파 검출</li>
+                  <li><strong>라이선스<br></strong>BSD 3-Clause, 상업적 사용 자유</li>
+                </ul>
+              </div>
+            </div>
+            <p class="note"><strong>버전</strong> — 1.0 은 2006년, 2.0 은 2024년. 이 강의는 2.x 기준이다.</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:3%"></i></div><span class="foot-num">01 / 37</span></footer>
+        </section>
+        <section class="slide" data-label="02 왜 NumPy인가" data-screen-label="02 왜 NumPy인가">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">02</span></header>
+          <h2 class="title">Why NumPy</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <div class="card warn">
+                <h3 class="card-h coral">파이썬 리스트</h3>
+                <pre data-run="" class="code on-soft tight">a = [<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>]
+a * <span class="no">2
+</span><span class="c"># [1, 2, 3, 1, 2, 3]</span></pre>
+                <p class="note">원소마다 파이썬 객체라 메모리가 크고, 계산은 for 루프로 돌아야 한다.</p>
+              </div>
+              <div class="card good">
+                <h3 class="card-h leaf">NumPy 배열</h3>
+                <pre data-run="" class="code on-soft tight">a = np.array([<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>])
+a * <span class="no">2
+</span><span class="c"># array([2, 4, 6])</span></pre>
+                <p class="note">같은 타입을 연속된 메모리에 두고, C로 구현된 연산이 <br>배열 전체에 한번에 적용된다.</p>
+              </div>
+            </div>
+            <p class="note"><b>Pandas, scikit-learn, OpenCV, PyTorch</b>가 모두 NumPy 배열을 기본 자료구조로 쓴다. 데이터 분석의 공통 언어다.</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:5%"></i></div><span class="foot-num">02 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="03 성능 비교" data-screen-label="03 성능 비교">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">03</span></header>
+          <h2 class="title">성능 비교 데모</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols-wide">
+              <pre data-run="" class="code tight"><span class="k">import </span>numpy <span class="k">as </span>np
+<span class="k">from </span>time <span class="k">import </span>perf_counter <span class="k">as </span>t
+
+n = <span class="no">1_000_000</span>
+xs = <span class="fn">list</span>(<span class="fn">range</span>(n))
+arr = np.arange(n)
+
+s = t(); <span class="fn">sum</span>(xs);   py = t() - s
+s = t(); arr.sum(); nu = t() - s
+<span class="fn">print</span>(<span class="s">f"{py/nu:.0f}배 빠름"</span>)</pre>
+              <ul class="ul">
+                <li>같은 계산인데 10배 이상 차이가 난다</li>
+                <li>데이터가 커질수록 격차가 벌어진다</li>
+                <li>메모리도 약 4배 이상 절약된다</li>
+                <li>핵심은 <b>for 루프를 배열 연산으로 바꾸는 것</b></li>
+              </ul>
+            </div>
+            <p class="note">숫자는 환경마다 다르다. 중요한 것은 절대값이 아니라 <b>자릿수가 달라진다는 사실</b>이다.</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:8%"></i></div><span class="foot-num">03 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="04 ndarray 기본" data-screen-label="04 ndarray 기본">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">04</span></header>
+          <h2 class="title">ndarray 기본</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">같은 타입의 숫자를 <b>연속된 메모리</b>에 담은 상자.</p>
+            <div class="cols">
+              <ul class="ul">
+                <li>모든 원소가 같은 dtype을 갖는다</li>
+                <li>크기가 생성 시 정해진다 (append는 새 배열 생성)</li>
+                <li>데이터 본체 + shape 정보로 구성된다</li>
+                <li>1차원은 벡터, 2차원은 행렬, 3차원 이상도 가능</li>
+              </ul>
+              <pre data-run="" class="code tight">a = np.array([[<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>],
+              [<span class="no">4</span>, <span class="no">5</span>, <span class="no">6</span>]])
+
+a.shape   <span class="c"># (2, 3)
+</span>a.dtype   <span class="c"># int64
+</span>a.ndim    <span class="c"># 2</span></pre>
+            </div>
+            <p class="note">센서 로그로 치면 <b>행은 시간, 열은 채널</b>이 된다. (샘플 수, 3축)</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:11%"></i></div><span class="foot-num">04 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="05 배열 생성" data-screen-label="05 배열 생성">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">05</span></header>
+          <h2 class="title">배열 생성</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">np.array([<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>])
+np.zeros((<span class="no">2</span>, <span class="no">3</span>))
+np.ones((<span class="no">2</span>, <span class="no">3</span>))
+np.full((<span class="no">2</span>, <span class="no">2</span>), <span class="no">7</span>)
+np.eye(<span class="no">3</span>)          <span class="c"># 단위행렬
+</span>np.empty((<span class="no">2</span>, <span class="no">2</span>))  <span class="c"># 초기화 안 함</span></pre>
+              <pre data-run="" class="code tight">np.arange(<span class="no">0</span>, <span class="no">10</span>, <span class="no">2</span>)
+<span class="c"># [0 2 4 6 8]
+
+</span>np.linspace(<span class="no">0</span>, <span class="no">1</span>, <span class="no">5</span>)
+<span class="c"># [0.   0.25 0.5  0.75 1.  ]</span></pre>
+            </div>
+            <div class="cols">
+              <ul class="ul">
+                <li>zeros, ones, full은 shape을 <b>튜플</b>로 받는다</li>
+                <li>arange는 <b>간격</b>, linspace는 <b>개수</b>를 지정</li>
+              </ul>
+              <ul class="ul">
+                <li>길이를 아는 배열은 미리 만들고 채우는 편이 빠르다</li>
+                <li>dtype 인자로 타입을 명시할 수 있다</li>
+              </ul>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:14%"></i></div><span class="foot-num">05 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="06 난수 배열" data-screen-label="06 난수 배열">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">06</span></header>
+          <h2 class="title">난수 배열</h2>
+          <div class="rule"></div>
+          <div class="body" style="padding-top: 0px;">
+            <div class="cols">
+              <pre data-run="" class="code tight">rng = np.random.default_rng(<span class="no">42</span>)
+
+rng.random((<span class="no">2</span>, <span class="no">3</span>))
+<span class="c"># 0 이상 1 미만 균등
+
+</span>rng.normal(<span class="no">0</span>, <span class="no">1</span>, size=<span class="no">100</span>)
+<span class="c"># 평균 0, 표준편차 1
+
+</span>rng.integers(<span class="no">1</span>, <span class="no">7</span>, size=<span class="no">10</span>)
+<span class="c"># 주사위 10번</span></pre>
+              <ul class="ul">
+                <li>최신 방식은 <b>default_rng</b> 제너레이터</li>
+                <li>씨드를 고정해야 결과가 재현된다</li>
+                <li>np.random.seed 는 구식 API</li>
+                <li>실습용 합성 센서 데이터를 만드는 데 쓴다</li>
+              </ul>
+            </div>
+            <p class="note">논문이나 보고서에 넣을 실험은 <b>씨드를 반드시 기록</b>한다. 재현되지 않는 결과는 결과가 아니다.</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:16%"></i></div><span class="foot-num">06 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="07 연습문제 1" data-screen-label="07 연습문제 1">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">07</span></header>
+          <h2 class="title">연습문제 1</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">균등분포와 정규분포에서 각각 5000개를 뽑아 히스토그램으로 비교하시오. 표본 수와 bins 를 바꾸면 모양이 어떻게 달라지는지 확인하시오.</p>
+            <div class="cols">
+              <pre data-run="" class="code tight"><span class="k">import </span>matplotlib.pyplot <span class="k">as </span>plt
+
+u = rng.uniform(<span class="no">0</span>, <span class="no">1</span>, <span class="no">5000</span>)   <span class="c"># 균등분포
+</span>g = rng.normal(<span class="no">0</span>, <span class="no">1</span>, <span class="no">5000</span>)    <span class="c"># 정규분포
+
+</span>fig, ax = plt.subplots(<span class="no">1</span>, <span class="no">2</span>, figsize=(<span class="no">9</span>, <span class="no">3</span>))
+
+<span class="err"># IMPLEMENT HERE</span></pre>
+              <div class="run-slot"><div data-run-out=""></div></div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:19%"></i></div><span class="foot-num">07 / 37</span></footer>
+        </section>
+        <section class="slide" data-label="08 배열 속성" data-screen-label="08 배열 속성">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">08</span></header>
+          <h2 class="title">배열 속성</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">a = np.zeros((<span class="no">2</span>, <span class="no">3</span>), dtype=np.float32)
+
+a.shape     <span class="c"># (2, 3)
+</span>a.ndim      <span class="c"># 2
+</span>a.size      <span class="c"># 6
+</span>a.dtype     <span class="c"># float32
+</span>a.itemsize  <span class="c"># 4 바이트
+</span>a.nbytes    <span class="c"># 24 바이트</span></pre>
+              <div class="card">
+                <h3 class="card-h sky">디버깅 첫 줄</h3>
+                <p class="note">배열 코드가 이상하면 먼저 <b>shape과 dtype을 찍어본다.</b> 오류의 절반은 이 둘 중 하나다.</p>
+                <pre data-run="" class="code tight"><span class="fn">print</span>(a.shape, a.dtype)</pre>
+              </div>
+            </div>
+            <p class="note">센서 로그처럼 양이 많은 실수 데이터는 <b>float32</b>만 써도 충분하다. 메모리가 절반으로 줄어든다.</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:22%"></i></div><span class="foot-num">08 / 37</span></footer>
+          <script type="text/x-run-setup">
+a = np.zeros((2, 3), dtype=np.float32)
+          </script>
+        </section>
+
+        <section class="slide" data-label="09 dtype과 형변환" data-screen-label="09 dtype과 형변환">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">09</span></header>
+          <h2 class="title">dtype과 형변환</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <div class="card soft">
+                <h3 class="card-h sky">형변환</h3>
+                <pre data-run="" class="code on-soft tight">a = np.array([<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>])
+a.dtype
+a.astype(np.float64)
+
+c = np.array([<span class="no">1.9</span>, <span class="no">2.9</span>])
+c.astype(np.int32)</pre>
+                <p class="note">astype 은 항상 새 배열 생성. 제자리 변환 아님</p>
+                <p class="note">실수에서 정수로는 버림. 반올림이 필요하면 np.round 를 먼저 적용</p>
+              </div>
+              <div class="card warn">
+                <h3 class="card-h coral">오버플로우</h3>
+                <pre data-run="" class="code on-soft tight">x = np.array([<span class="no">127</span>], dtype=np.int8)
+x.dtype
+x + <span class="no">1</span></pre>
+                <p class="note">정수 타입은 표현 범위 고정. 범위를 넘으면 값이 순환</p>
+                <p class="note">센서 원시값처럼 작은 정수형을 다룰 때 특히 주의</p>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:24%"></i></div><span class="foot-num">09 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="10 연습문제 2" data-screen-label="10 연습문제 2">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">10</span></header>
+          <h2 class="title">연습문제 2</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">a 는 [125, 126, 127] 이다. 하지만 a + 1 은 [126, 127, 128] 이 아니다. 원인을 분석하고 코드를 수정하시오.</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">a
+a + <span class="no">1</span>
+np.array_equal(a + <span class="no">1</span>, [<span class="no">126</span>, <span class="no">127</span>, <span class="no">128</span>])
+
+<span class="err"># IMPLEMENT HERE</span></pre>
+              <div class="run-slot" style="min-height:420px"><div data-run-out=""></div></div>
+            </div>
+          </div>
+          <script type="text/x-run-setup">
+a = np.array([125, 126, 127], dtype=np.int8)
+          </script>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:27%"></i></div><span class="foot-num">10 / 37</span></footer>
+        </section>
+        <section class="slide" data-label="11 인덱싱과 슬라이싱" data-screen-label="11 인덱싱과 슬라이싱">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">11</span></header>
+          <h2 class="title">인덱싱과 슬라이싱</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">a = np.arange(<span class="no">12</span>).reshape(<span class="no">3</span>, <span class="no">4</span>)
+<span class="c"># [[ 0  1  2  3]
+#  [ 4  5  6  7]
+#  [ 8  9 10 11]]
+
+</span>a[<span class="no">0</span>, <span class="no">2</span>]      <span class="c"># 2
+</span>a[<span class="no">1</span>]         <span class="c"># [4 5 6 7]
+</span>a[:, <span class="no">1</span>]      <span class="c"># [1 5 9]
+</span>a[<span class="no">0</span>:<span class="no">2</span>, <span class="no">1</span>:<span class="no">3</span>]  <span class="c"># [[1 2] [5 6]]
+</span>a[-<span class="no">1</span>, -<span class="no">1</span>]    <span class="c"># 11</span></pre>
+              <ul class="ul">
+                <li>콤마로 축을 구분한다</li>
+                <li>리스트의 a[0][2] 와 달리 한 번에 접근한다</li>
+                <li>: 는 해당 축 전체를 뜻한다</li>
+                <li>음수 인덱스는 뒤에서부터 센다</li>
+              </ul>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:30%"></i></div><span class="foot-num">11 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="12 뷰와 복사" data-screen-label="12 뷰와 복사">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">12</span></header>
+          <h2 class="title">뷰(view) 와 복사(copy)</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <div class="card warn">
+                <h3 class="card-h coral">슬라이싱은 뷰다</h3>
+                <pre data-run="" class="code on-soft tight">a = np.arange(<span class="no">5</span>)
+b = a[<span class="no">1</span>:<span class="no">4</span>]
+b[<span class="no">0</span>] = <span class="no">99</span>
+
+a  <span class="err"># [ 0 99  2  3  4]</span></pre>
+                <p class="note">b를 고쳤는데 <b>a가 변경된다.</b> 메모리를 공유하기 때문이다.</p>
+              </div>
+              <div class="card good">
+                <h3 class="card-h leaf">copy()로 끊는다</h3>
+                <pre data-run="" class="code on-soft tight">a = np.arange(<span class="no">5</span>)
+c = a[<span class="no">1</span>:<span class="no">4</span>].copy()
+c[<span class="no">0</span>] = <span class="no">99</span>
+
+a  <span class="c"># [0 1 2 3 4]</span></pre>
+                <p class="note">원본을 지켜야 한다면 반드시 <b>copy()</b>를 명시한다.</p>
+              </div>
+            </div>
+            <p class="note">슬라이싱은 <b>뷰</b>, 팬시 인덱싱과 불리언 마스킹은 <b>복사</b>를 돌려준다. 이 차이가 버그의 단골 원인이다.</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:32%"></i></div><span class="foot-num">12 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="13 연습문제 3" data-screen-label="13 연습문제 3">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">13</span></header>
+          <h2 class="title">연습문제 3</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">data 는 100x100 배열이다. 원래 그림을 4등분해 사분면 순서를 바꿔 놓았다. 슬라이싱만으로 원래 그림을 복원하시오.</p>
+            <div class="cols">
+              <pre data-run="" class="code tight"><span class="k">import </span>matplotlib.pyplot <span class="k">as </span>plt
+
+fix = data.copy()
+<span class="err"># IMPLEMENT HERE</span>
+
+fig, ax = plt.subplots(figsize=(<span class="no">4</span>, <span class="no">4</span>))
+ax.imshow(fix, cmap=<span class="s">"gray"</span>, vmin=<span class="no">0</span>, vmax=<span class="no">1</span>)</pre>
+              <div class="run-slot"><div data-run-out=""></div></div>
+            </div>
+          </div>
+          <script type="text/x-run-setup">
+img = np.ones((100, 100))
+img[14:22, 22:78] = 0.0
+rows = np.arange(22, 90)
+cols = (78 - (rows - 22) * 0.62).astype(int)
+for i in range(rows.size):
+    img[rows[i], cols[i] - 4:cols[i] + 4] = 0.0
+
+data = np.empty_like(img)
+data[:50, :50] = img[50:, :50]
+data[:50, 50:] = img[:50, :50]
+data[50:, 50:] = img[:50, 50:]
+data[50:, :50] = img[50:, 50:]
+          </script>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:35%"></i></div><span class="foot-num">13 / 37</span></footer>
+        </section>
+        <section class="slide" data-label="14 팬시 인덱싱" data-screen-label="14 팬시 인덱싱">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">14</span></header>
+          <h2 class="title">팬시 인덱싱</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">a = np.array([<span class="no">10</span>, <span class="no">60</span>, <span class="no">30</span>, <span class="no">40</span>, <span class="no">20</span>])
+
+idx = [<span class="no">4</span>, <span class="no">0</span>, <span class="no">2</span>]
+a[idx]
+
+order = np.argsort(a)
+order
+a[order]</pre>
+              <ul class="ul">
+                <li>정수 배열로 원하는 순서 구성</li>
+                <li>같은 인덱스를 여러 번 사용 가능</li>
+                <li>결과는 항상 <b>새 배열(복사)</b></li>
+                <li>2차원은 행 인덱스와 열 인덱스를 함께 전달</li>
+              </ul>
+            </div>
+            <pre data-run="" class="code tight">m = np.arange(<span class="no">12</span>).reshape(<span class="no">3</span>, <span class="no">4</span>)
+m[[<span class="no">0</span>, <span class="no">2</span>], [<span class="no">1</span>, <span class="no">3</span>]]</pre>
+            <p class="note">행 인덱스와 열 인덱스를 짝지어 (0, 1) 과 (2, 3) 위치의 값을 뽑는다</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:38%"></i></div><span class="foot-num">14 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="15 불리언 마스킹" data-screen-label="15 불리언 마스킹">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">15</span></header>
+          <h2 class="title">불리언 마스킹</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">temp = np.array([<span class="no">21.5</span>, <span class="no">88.0</span>, <span class="no">22.1</span>, -<span class="no">40.0</span>])
+
+mask = (temp &gt; -<span class="no">20</span>) &amp; (temp &lt; <span class="no">60</span>)
+<span class="c"># [True False True False]
+
+</span>temp[mask]     <span class="c"># [21.5 22.1]
+</span>mask.sum()     <span class="c"># 2  조건 만족 개수
+</span>(~mask).sum()  <span class="c"># 2  이상치 개수</span></pre>
+              <div class="card warn">
+                <h3 class="card-h coral">and / or 는 안 된다</h3>
+                <pre data-run="" class="code on-soft tight">temp &gt; -<span class="no">20</span> <span class="k">and </span>temp &lt; <span class="no">60
+</span><span class="err"># ValueError: truth value
+# of an array is ambiguous</span></pre>
+                <p class="note"><b>&amp; | ~</b> 를 쓰고 각 조건을 <b>괄호</b>로 묶는다. 연산자 우선순위 때문에 괄호가 필수다.</p>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:41%"></i></div><span class="foot-num">15 / 37</span></footer>
+          <script type="text/x-run-setup">
+temp = np.array([21.5, 88.0, 22.1, -40.0])
+          </script>
+        </section>
+
+        <section class="slide" data-label="16 연습문제 4" data-screen-label="16 연습문제 4">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">16</span></header>
+          <h2 class="title">연습문제 4</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">temp, hum, place 는 같은 인덱스를 갖는 배열이다. 온도가 30 이상 50 이하이면서 습도가 40 이상인 지점의 이름을 구하시오.</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">temp
+hum
+place
+
+<span class="err"># IMPLEMENT HERE</span></pre>
+              <div class="run-slot"><div data-run-out=""></div></div>
+            </div>
+          </div>
+          <script type="text/x-run-setup">
+_r = np.random.default_rng(0)
+temp = np.round(_r.uniform(-10, 60, 12), 1)
+hum = np.round(_r.uniform(10, 90, 12), 1)
+place = np.array(list("ABCDEFGHIJKL"))
+          </script>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:43%"></i></div><span class="foot-num">16 / 37</span></footer>
+        </section>
+        <section class="slide" data-label="17 where와 조건 처리" data-screen-label="17 where와 조건 처리">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">17</span></header>
+          <h2 class="title">where와 조건 처리</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">a = np.array([-<span class="no">3</span>, <span class="no">5</span>, -<span class="no">1</span>, <span class="no">9</span>])
+
+np.where(a &lt; <span class="no">0</span>, <span class="no">0</span>, a)
+<span class="c"># [0 5 0 9]  음수를 0으로
+
+</span>np.clip(a, <span class="no">0</span>, <span class="no">6</span>)
+<span class="c"># [0 5 0 6]  범위 밖을 잘라낸다
+
+</span>np.where(a &lt; <span class="no">0</span>)
+<span class="c"># (array([0, 2]),)  인덱스</span></pre>
+              <ul class="ul">
+                <li><b>where(조건, 참일 때, 거짓일 때)</b> 세 인자 형태</li>
+                <li>인자가 하나면 조건을 만족하는 인덱스를 돌려준다</li>
+                <li>clip은 센서 사양 범위를 강제할 때 편하다</li>
+                <li>if 문 대신 쓰는 배열용 조건문이라고 생각하면 된다</li>
+              </ul>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:46%"></i></div><span class="foot-num">17 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="18 형태 변경" data-screen-label="18 형태 변경">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">18</span></header>
+          <h2 class="title">형태 변경</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">a = np.arange(<span class="no">12</span>)
+
+a.reshape(<span class="no">3</span>, <span class="no">4</span>)
+a.reshape(<span class="no">3</span>, -<span class="no">1</span>)   <span class="c"># -1은 자동 계산
+
+</span>b = a.reshape(<span class="no">3</span>, <span class="no">4</span>)
+b.ravel()     <span class="c"># 1차원 뷰
+</span>b.flatten()   <span class="c"># 1차원 복사
+</span>b.T           <span class="c"># 전치 (4, 3)</span></pre>
+              <ul class="ul">
+                <li>reshape는 원소 개수가 맞아야 한다</li>
+                <li>-1은 나머지 하나를 알아서 정하라는 뜻</li>
+                <li>reshape와 T는 가능하면 뷰를 돌려준다</li>
+                <li>ravel은 뷰, flatten은 복사로 기억한다</li>
+              </ul>
+            </div>
+            <p class="note">센서 데이터를 <b>(샘플, 채널)</b> 형태로 맞추는 작업이 전처리의 첫 단계다.</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:49%"></i></div><span class="foot-num">18 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="19 연습문제 5" data-screen-label="19 연습문제 5">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">19</span></header>
+          <h2 class="title">연습문제 5</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">wave 는 0과 1 로 채워진 길이 100 배열이다. 알맞은 형태로 reshape 하면 사인파가 보인다. 그 형태를 찾으시오.</p>
+            <div class="cols">
+              <pre data-run="" class="code tight"><span class="k">import </span>matplotlib.pyplot <span class="k">as </span>plt
+
+img = wave.reshape(<span class="no">10</span>, <span class="no">10</span>)   <span class="err"># IMPLEMENT HERE</span>
+
+fig, ax = plt.subplots(figsize=(<span class="no">8</span>, <span class="no">2</span>))
+ax.imshow(img, cmap=<span class="s">"gray_r"</span>, vmin=<span class="no">0</span>, vmax=<span class="no">1</span>)</pre>
+              <div class="run-slot"><div data-run-out=""></div></div>
+            </div>
+          </div>
+          <script type="text/x-run-setup">
+_x = np.linspace(0, 2 * np.pi, 20)
+_row = np.round(2 - 2 * np.sin(_x)).astype(int)
+_img = np.zeros((5, 20), dtype=int)
+_img[_row, np.arange(20)] = 1
+wave = _img.reshape(-1)
+          </script>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:51%"></i></div><span class="foot-num">19 / 37</span></footer>
+        </section>
+        <section class="slide" data-label="20 축 추가와 제거" data-screen-label="20 축 추가와 제거">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">20</span></header>
+          <h2 class="title">축 추가와 제거</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">a = np.array([<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>])   <span class="c"># (3,)
+
+</span>a[:, np.newaxis]   <span class="c"># (3, 1) 열벡터
+</span>a[np.newaxis, :]   <span class="c"># (1, 3) 행벡터
+
+</span>np.expand_dims(a, axis=<span class="no">0</span>)
+<span class="c"># (1, 3)
+
+</span>np.squeeze(np.zeros((<span class="no">1</span>, <span class="no">3</span>, <span class="no">1</span>)))
+<span class="c"># (3,)  크기 1인 축 제거</span></pre>
+              <ul class="ul">
+                <li>브로드캐스팅 모양을 맞추려고 축을 늘린다</li>
+                <li>None 은 np.newaxis 와 같다</li>
+                <li>squeeze는 쓸모없는 1짜리 축을 걸러낸다</li>
+                <li>shape을 입단으로 말해 보면 실수가 줄어든다</li>
+              </ul>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:54%"></i></div><span class="foot-num">20 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="21 결합과 분할" data-screen-label="21 결합과 분할">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">21</span></header>
+          <h2 class="title">배열 결합과 분할</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">a = np.array([[<span class="no">1</span>, <span class="no">2</span>]])
+b = np.array([[<span class="no">3</span>, <span class="no">4</span>]])
+
+np.vstack([a, b])  <span class="c"># (2, 2) 세로
+</span>np.hstack([a, b])  <span class="c"># (1, 4) 가로
+
+</span>np.concatenate([a, b], axis=<span class="no">0</span>)
+<span class="c"># 축을 명시하는 일반형</span></pre>
+              <pre data-run="" class="code tight">x = np.arange(<span class="no">6</span>)
+
+np.split(x, <span class="no">3</span>)
+<span class="c"># [array([0,1]), array([2,3]),
+#  array([4,5])]
+
+</span>np.array_split(x, <span class="no">4</span>)
+<span class="c"># 나누어 떨어져도 된다</span></pre>
+            </div>
+            <p class="note">결합은 <b>새 메모리를 할당</b>한다. 루프 안에서 반복해 붙이면 느리다. 리스트에 모은 뒤 마지막에 한 번만 concatenate 한다.</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:57%"></i></div><span class="foot-num">21 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="22 요소별 연산" data-screen-label="22 요소별 연산">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">22</span></header>
+          <h2 class="title">요소별 연산과 벡터화</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">a = np.array([<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>])
+b = np.array([<span class="no">10</span>, <span class="no">20</span>, <span class="no">30</span>])
+
+a + b     <span class="c"># [11 22 33]
+</span>a * b     <span class="c"># [10 40 90]
+</span>b / a     <span class="c"># [10. 10. 10.]
+</span>a ** <span class="no">2</span>    <span class="c"># [1 4 9]</span></pre>
+              <figure class="fig plain" style="max-width:560px">
+                <img src="./imgs/np-broadcast-scalar.svg" alt="스칼라 브로드캐스팅">
+                <figcaption>스칼라 2가 배열 크기만큼 늘어나 곱해진다.</figcaption>
+              </figure>
+            </div>
+            <p class="note"><b>벡터화</b>: 루프 없이 배열 전체에 한번에 적용한다. sqrt, exp, log, sin 같은 <b>유니버설 함수(ufunc)</b>도 마찬가지다.</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:59%"></i></div><span class="foot-num">22 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="23 브로드캐스팅 규칙" data-screen-label="23 브로드캐스팅 규칙">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">23</span></header>
+          <h2 class="title">브로드캐스팅 규칙</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <div style="display:flex;flex-direction:column;gap:28px">
+                <ol class="steps">
+                  <li>맨 뒤쪽 축부터 하나씩 비교한다</li>
+                  <li>크기가 같거나 한쪽이 1이면 통과</li>
+                  <li>1인 축을 복사하듯이 늘려 맞춘다</li>
+                  <li>그 외에는 오류를 낸다</li>
+                </ol>
+                <pre class="code xs">(<span class="no">3</span>, <span class="no">4</span>) + (<span class="no">4</span>,)    <span class="c"># OK
+</span>(<span class="no">3</span>, <span class="no">4</span>) + (<span class="no">3</span>, <span class="no">1</span>)  <span class="c"># OK
+</span>(<span class="no">3</span>, <span class="no">4</span>) + (<span class="no">3</span>,)    <span class="err"># ValueError</span></pre>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:24px">
+                <figure class="fig plain" style="max-width:520px">
+                  <img src="./imgs/np-broadcast-row.svg" alt="브로드캐스팅 성공">
+                  <figcaption>(4,3) + (3,) — 뒤쪽 축이 맞아 (3,)이 행마다 복사되듯 늘어난다</figcaption>
+                </figure>
+                <figure class="fig plain" style="max-width:460px">
+                  <img src="./imgs/np-broadcast-fail.svg" alt="브로드캐스팅 실패">
+                  <figcaption>(4,3) + (4,) — 뒤쪽 축 3과 4가 달라 오류.</figcaption>
+                </figure>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:62%"></i></div><span class="foot-num">23 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="24 연습문제 6" data-screen-label="24 연습문제 6">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">24</span></header>
+          <h2 class="title">연습문제 6</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">a 는 (3,), b 는 (4,) 이다. 지금은 오류가 난다. reshape 만 사용해 a + b 가 (3, 4) 결과를 내도록 고치시오.</p>
+            <div class="formula" style="margin-top:6px">
+              <span data-tex="a \in \mathbb{R}^{3}"></span>
+              <span data-tex="b \in \mathbb{R}^{4}"></span>
+              <span data-tex="a + b \in \mathbb{R}^{3 \times 4}"></span>
+            </div>
+            <div class="cols">
+              <pre data-run="" class="code tight">a.shape
+b.shape
+a + b
+
+<span class="err"># IMPLEMENT HERE</span></pre>
+              <div class="run-slot"><div data-run-out=""></div></div>
+            </div>
+          </div>
+          <script type="text/x-run-setup">
+a = np.array([1, 2, 3])
+b = np.array([10, 20, 30, 40])
+          </script>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:65%"></i></div><span class="foot-num">24 / 37</span></footer>
+        </section>
+        <section class="slide" data-label="25 브로드캐스팅 활용" data-screen-label="25 브로드캐스팅 활용">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">25</span></header>
+          <h2 class="title">브로드캐스팅 활용</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">data = rng.normal(size=(<span class="no">100</span>, <span class="no">3</span>))
+
+col_mean = data.mean(axis=<span class="no">0</span>)  <span class="c"># (3,)
+</span>col_std  = data.std(axis=<span class="no">0</span>)   <span class="c"># (3,)
+
+</span>centered = data - col_mean
+normed = (data - col_mean) / col_std
+<span class="c"># 둘 다 (100, 3)</span></pre>
+              <figure class="fig plain" style="max-width:560px">
+                <img src="./imgs/np-broadcast-outer.svg" alt="양쪽이 늘어나는 브로드캐스팅">
+                <figcaption>(4,1) + (3,) — 양쪽이 다 늘어나 입력보다 큰 (4,3)이 된다.</figcaption>
+              </figure>
+            </div>
+            <div class="cols">
+              <pre data-run="" class="code tight">bias = np.array([<span class="no">0.02</span>, -<span class="no">0.01</span>, <span class="no">0.05</span>])
+calibrated = data - bias   <span class="c"># 축별 영점 보정</span></pre>
+              <ul class="ul">
+                <li>열별 평균 빼기와 표준화가 한 줄이다</li>
+                <li>센서 채널별 보정값 적용도 같은 패턴을 쓴다</li>
+              </ul>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:68%"></i></div><span class="foot-num">25 / 37</span></footer>
+          <script type="text/x-run-setup">
+data = rng.normal(size=(100, 3))
+          </script>
+        </section>
+
+        <section class="slide" data-label="26 연습문제 7" data-screen-label="26 연습문제 7">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">26</span></header>
+          <h2 class="title">연습문제 7</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">u 와 v 의 곱을 먼저 손으로 예측한 뒤 실행해 확인하시오.</p>
+            <div class="formula" style="margin-top:6px">
+              <span data-tex="u \in \mathbb{R}^{3 \times 1}"></span>
+              <span data-tex="v \in \mathbb{R}^{4}"></span>
+              <span data-tex="(u \odot v)_{ij} = u_{i} v_{j}"></span>
+            </div>
+            <div class="cols">
+              <pre data-run="" class="code tight">u
+v
+u * v
+
+<span class="err"># IMPLEMENT HERE</span></pre>
+              <div class="run-slot"><div data-run-out=""></div></div>
+            </div>
+          </div>
+          <script type="text/x-run-setup">
+u = np.array([[1], [2], [3]])
+v = np.array([10, 20, 30, 40])
+          </script>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:70%"></i></div><span class="foot-num">26 / 37</span></footer>
+        </section>
+        <section class="slide" data-label="27 집계 함수" data-screen-label="27 집계 함수">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">27</span></header>
+          <h2 class="title">집계 함수</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">a = np.array([[<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>],
+              [<span class="no">4</span>, <span class="no">5</span>, <span class="no">6</span>]])
+
+a.sum()      <span class="c"># 21
+</span>a.mean()     <span class="c"># 3.5
+</span>a.min()      <span class="c"># 1
+</span>a.max()      <span class="c"># 6
+</span>a.std()      <span class="c"># 1.707...
+</span>a.argmax()   <span class="c"># 5  평탄화 기준 위치</span></pre>
+              <div class="grid8">
+                <div class="std"><span class="std-n">sum</span><span class="std-d">합계</span></div>
+                <div class="std"><span class="std-n">mean</span><span class="std-d">평균</span></div>
+                <div class="std"><span class="std-n">std, var</span><span class="std-d">표준편차, 분산</span></div>
+                <div class="std"><span class="std-n">median</span><span class="std-d">중앙값</span></div>
+                <div class="std"><span class="std-n">argmin, argmax</span><span class="std-d">최솟값 위치</span></div>
+                <div class="std"><span class="std-n">cumsum</span><span class="std-d">누적합</span></div>
+              </div>
+            </div>
+            <p class="note"><b>argmax는 값이 아니라 위치</b>를 돌려준다. 충격이 가장 컸 순간을 찾을 때 쓴다.</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:73%"></i></div><span class="foot-num">27 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="28 axis 이해하기" data-screen-label="28 axis 이해하기">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">28</span></header>
+          <h2 class="title">axis 이해하기</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">axis는 <b>사라지는 축</b>이다.</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">a = np.array([[<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>],
+              [<span class="no">4</span>, <span class="no">5</span>, <span class="no">6</span>]])   <span class="c"># (2, 3)
+
+</span>a.sum(axis=<span class="no">0</span>)   <span class="c"># [5 7 9]   shape (3,)
+</span>a.sum(axis=<span class="no">1</span>)   <span class="c"># [6 15]    shape (2,)
+
+</span>a.sum(axis=<span class="no">0</span>, keepdims=<span class="k">True</span>)
+<span class="c"># [[5 7 9]]  shape (1, 3)</span></pre>
+              <ul class="ul">
+                <li>axis=0은 행을 따라 접어 <b>열별 결과</b></li>
+                <li>axis=1은 열을 따라 접어 <b>행별 결과</b></li>
+                <li>keepdims=True는 축을 1로 남겨 브로드캐스팅을 쉽게 한다</li>
+                <li>센서 로그 (샘플, 채널)에서 axis=0은 시간 방향 집계다</li>
+              </ul>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:76%"></i></div><span class="foot-num">28 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="29 결측값 처리" data-screen-label="29 결측값 처리">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">29</span></header>
+          <h2 class="title">결측값(nan) 처리</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">a = np.array([<span class="no">1.0</span>, np.nan, <span class="no">3.0</span>])
+
+a.mean()        <span class="c"># nan  오염된다
+</span>np.nanmean(a)   <span class="c"># 2.0
+
+</span>np.isnan(a)     <span class="c"># [False True False]
+</span>a[np.isnan(a)] = <span class="no">0.0</span>
+
+np.nan == np.nan  <span class="c"># False</span></pre>
+              <div class="card warn">
+                <h3 class="card-h coral">nan의 성질</h3>
+                <ul class="ul coral">
+                  <li>nan은 float 배열에만 존재한다</li>
+                  <li>비교 연산으로 찾을 수 없다</li>
+                  <li>하나만 있어도 전체 통계가 nan이 된다</li>
+                  <li>nansum, nanmean, nanstd, nanmax 를 쓴다</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:78%"></i></div><span class="foot-num">29 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="30 정렬과 탐색" data-screen-label="30 정렬과 탐색">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">30</span></header>
+          <h2 class="title">정렬과 탐색</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">a = np.array([<span class="no">3</span>, <span class="no">1</span>, <span class="no">2</span>])
+
+np.sort(a)      <span class="c"># [1 2 3]  복사본
+</span>a.sort()        <span class="c"># 제자리 정렬
+</span>np.argsort(a)   <span class="c"># 정렬 순서 인덱스</span></pre>
+              <pre data-run="" class="code tight">np.unique([<span class="no">1</span>, <span class="no">1</span>, <span class="no">2</span>])   <span class="c"># [1 2]
+
+</span>np.searchsorted([<span class="no">1</span>, <span class="no">3</span>, <span class="no">5</span>], <span class="no">4</span>)
+<span class="c"># 2  정렬 상태를 유지할 위치</span></pre>
+            </div>
+            <div class="cols">
+              <ul class="ul">
+                <li><b>np.sort</b>는 복사본, <b>a.sort()</b>는 원본을 바꿈</li>
+                <li>2차원에서는 axis를 지정해 행별/열별 정렬</li>
+              </ul>
+              <ul class="ul">
+                <li>argsort로 다른 배열을 같은 순서로 재배열한다</li>
+                <li>시간순 정렬이 깨진 로그를 바로잡을 때 쓴다</li>
+              </ul>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:81%"></i></div><span class="foot-num">30 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="31 행렬 연산" data-screen-label="31 행렬 연산">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">31</span></header>
+          <h2 class="title">행렬 연산</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="formula" style="margin-top:6px">
+              <span data-tex="(A \odot A)_{ij} = A_{ij} A_{ij}"></span>
+              <span data-tex="(AA)_{ij} = \sum_{k} A_{ik} A_{kj}"></span>
+              <span data-tex="(A^{T})_{ij} = A_{ji}"></span>
+            </div>
+            <div class="cols">
+              <div class="card">
+                <h3 class="card-h sky">* 는 요소별 곱</h3>
+                <pre data-run="" class="code tight">A = np.array([[<span class="no">1</span>, <span class="no">2</span>],
+              [<span class="no">3</span>, <span class="no">4</span>]])
+A * A
+<span class="c"># [[ 1  4]
+#  [ 9 16]]</span></pre>
+              </div>
+              <div class="card soft">
+                <h3 class="card-h sky">@ 는 행렬 곱</h3>
+                <pre data-run="" class="code on-soft tight">A @ A
+<span class="c"># [[ 7 10]
+#  [15 22]]
+
+</span>A.T        <span class="c"># 전치
+</span>A.dot(A)   <span class="c"># @ 와 같다</span></pre>
+              </div>
+            </div>
+            <p class="note">수식을 그대로 옮길 때 <b>곱셈 기호를 확인</b>하는 습관이 필요하다. 둘은 shape은 같아도 결과가 전혀 다르다.</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:84%"></i></div><span class="foot-num">31 / 37</span></footer>
+          <script type="text/x-run-setup">
+A = np.array([[1, 2],
+              [3, 4]])
+          </script>
+        </section>
+
+        <section class="slide" data-label="32 선형대수 모듈" data-screen-label="32 선형대수 모듈">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">32</span></header>
+          <h2 class="title">선형대수 모듈</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <pre data-run="" class="code tight"><span class="k">from </span>numpy.linalg <span class="k">import </span>inv, solve, det, norm
+
+A = np.array([[<span class="no">2.</span>, <span class="no">1.</span>],
+              [<span class="no">1.</span>, <span class="no">3.</span>]])
+b = np.array([<span class="no">5.</span>, <span class="no">10.</span>])
+
+solve(A, b)   <span class="c"># Ax = b 의 해
+</span>inv(A)        <span class="c"># 역행렬
+</span>det(A)        <span class="c"># 행렬식
+</span>norm(b)       <span class="c"># 벡터의 크기</span></pre>
+            <div class="cols">
+              <ul class="ul">
+                <li><b>inv(A) @ b 보다 solve(A, b)</b>가 빠르고 안정적이다</li>
+                <li>eig, svd, qr 등 분해도 제공된다</li>
+              </ul>
+              <ul class="ul">
+                <li>최소자승법은 lstsq로 한 줄에 풀 수 있다</li>
+                <li>칼만 필터, 자세 추정의 기본 도구다</li>
+              </ul>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:86%"></i></div><span class="foot-num">32 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="33 연습문제 8" data-screen-label="33 연습문제 8">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">33</span></header>
+          <h2 class="title">연습문제 8</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">A x = b 를 푸는 x 를 구하시오. 이어서 A * A 와 A @ A 의 결과가 어떻게 다른지 확인하시오.</p>
+            <div class="formula" style="margin-top:6px">
+              <span data-tex="A\mathbf{x} = \mathbf{b}"></span>
+              <span data-tex="\mathbf{x} = A^{-1}\mathbf{b}"></span>
+              <span data-tex="(A \odot A)_{ij} = A_{ij} A_{ij}"></span>
+              <span data-tex="(AA)_{ij} = \sum_{k} A_{ik} A_{kj}"></span>
+            </div>
+            <div class="cols">
+              <pre data-run="" class="code tight">A
+b
+
+<span class="err"># IMPLEMENT HERE</span></pre>
+              <div class="run-slot"><div data-run-out=""></div></div>
+            </div>
+          </div>
+          <script type="text/x-run-setup">
+A = np.array([[2., 1., 0.],
+              [1., 3., 1.],
+              [0., 1., 2.]])
+b = np.array([5., 10., 7.])
+          </script>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:89%"></i></div><span class="foot-num">33 / 37</span></footer>
+        </section>
+        <section class="slide" data-label="34 연습문제 9" data-screen-label="34 연습문제 9">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">34</span></header>
+          <h2 class="title">연습문제 9</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">pts 는 점을 행으로 쌓은 (N, 2) 배열이다. t = 30도 회전 행렬 R(t) 를 만들어 pts 를 회전시키시오.</p>
+            <div class="formula" style="margin-top:6px">
+              <span data-tex="R(t) = \begin{bmatrix} \cos t &amp; -\sin t \\ \sin t &amp; \cos t \end{bmatrix}"></span>
+              <span data-tex="P' = P R^{T}"></span>
+            </div>
+            <div class="cols">
+              <pre data-run="" class="code tight">t = np.deg2rad(<span class="no">30</span>)
+pts
+
+<span class="err"># IMPLEMENT HERE</span></pre>
+              <div class="run-slot"><div data-run-out=""></div></div>
+            </div>
+          </div>
+          <script type="text/x-run-setup">
+pts = np.array([[1., 0.],
+                [0., 1.],
+                [1., 1.]])
+          </script>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:92%"></i></div><span class="foot-num">34 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="35 파일 입출력" data-screen-label="35 파일 입출력">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">35</span></header>
+          <h2 class="title">파일 입출력</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">np.save(<span class="s">"data.npy"</span>, a)
+b = np.load(<span class="s">"data.npy"</span>)
+
+np.savez(<span class="s">"log.npz"</span>, imu=a, gps=b)
+d = np.load(<span class="s">"log.npz"</span>)
+d[<span class="s">"imu"</span>]</pre>
+              <pre data-run="" class="code tight">np.savetxt(<span class="s">"data.csv"</span>, a,
+           delimiter=<span class="s">","</span>)
+
+np.loadtxt(<span class="s">"data.csv"</span>,
+           delimiter=<span class="s">","</span>)</pre>
+            </div>
+            <div class="cols">
+              <div class="card good">
+                <h3 class="card-h leaf">npy / npz</h3>
+                <p class="note">이진 형식. 빠르고 <b>dtype과 shape이 그대로 보존</b>된다. 중간 결과 저장에 적합.</p>
+              </div>
+              <div class="card">
+                <h3 class="card-h sky">csv / txt</h3>
+                <p class="note">사람이 읽기 좋고 다른 도구와 주고받기 쉽다. 대신 느리고 정밀도 손실이 생길 수 있다.</p>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:95%"></i></div><span class="foot-num">35 / 37</span></footer>
+          <script type="text/x-run-setup">
+a = np.array([1, 2, 3])
+          </script>
+        </section>
+
+        <section class="slide" data-label="36 자주 하는 실수" data-screen-label="36 자주 하는 실수">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">36</span></header>
+          <h2 class="title">자주 하는 실수</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <div class="card warn">
+                <h3 class="card-h coral">이런 일이 생긴다</h3>
+                <ul class="ul coral">
+                  <li>슬라이스가 뷰인 줄 모르고 원본을 망가뜨린다</li>
+                  <li>and / or 를 써서 ValueError가 난다</li>
+                  <li>shape이 맞지 않아 브로드캐스팅 오류가 난다</li>
+                  <li>axis를 반대로 줘 엉뚝한 통계가 나온다</li>
+                  <li>정수 dtype 오버플로우를 못 보고 지나간다</li>
+                </ul>
+              </div>
+              <div class="card good">
+                <h3 class="card-h leaf">이렇게 막는다</h3>
+                <ul class="ul leaf">
+                  <li>의심되면 shape과 dtype을 먼저 출력한다</li>
+                  <li>원본을 지켜야 하면 copy()를 명시한다</li>
+                  <li>조건은 &amp; | ~ 와 괄호로 쓴다</li>
+                  <li>axis는 결과 shape으로 검산한다</li>
+                  <li>센서 원시값은 읽자마자 float로 바꿔둔다</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:97%"></i></div><span class="foot-num">36 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="37 실습 안내" data-screen-label="37 실습 안내">
+          <header class="head"><span class="kicker">NumPy</span><span class="folio">37</span></header>
+          <h2 class="title">실습 안내 (lab03)</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <ol class="steps">
+                <li>합성 가속도 3축 배열 생성 (씨드 고정)</li>
+                <li>물리 범위 밖 값을 마스킹으로 걸러내기</li>
+                <li>축별 평균, 표준편차, 최대 가속도 시점</li>
+                <li>5샘플 이동평균로 스무딩</li>
+                <li>회전 행렬로 센서 좌표계 정렬</li>
+              </ol>
+              <div class="card soft">
+                <h3 class="card-h sky">체크포인트</h3>
+                <ul class="ul">
+                  <li>for 루프 없이 작성했는가</li>
+                  <li>원본 배열이 그대로 남아 있는가</li>
+                  <li>결과 shape을 설명할 수 있는가</li>
+                </ul>
+                <div class="chips"><span class="chip sun">30분</span><span class="chip">lab03-numpy.md</span></div>
+              </div>
+            </div>
+            <p class="note">다음: <b>Part 2-3 Pandas</b> — 라벨이 붙은 표 형태 데이터와 전처리.</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:100%"></i></div><span class="foot-num">37 / 37</span></footer>
+        </section>
+      
+</deck-stage>
+
+
+
+</body></html>

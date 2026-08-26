@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Part 2-3 Pandas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;family=Atkinson+Hyperlegible:wght@400;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Noto+Sans+KR:wght@400;500;700;900&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./deck.css">
+<script defer="" src="./deck.js"></script>
+<script type="text/x-deck-preamble">
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+import numpy as np
+import pandas as pd
+
+rng = np.random.default_rng(7)
+n = 600
+stamp = pd.date_range("2026-08-21", periods=n, freq="7min")
+
+frame = pd.DataFrame({
+    "t": stamp.astype("int64") / 1e9,
+    "timestamp": stamp,
+    "day": stamp.date.astype(str),
+    "sensor_id": rng.choice(["s01", "s02", "s03"], n),
+    "id": np.arange(1, n + 1),
+    "temp": np.round(rng.normal(28, 6, n), 1),
+    "hum": np.round(rng.normal(45, 8, n), 1),
+    "status": rng.choice([" ok ", "ok", "warn", "err_hot"], n),
+    "tag": ["blk-%03d" % i for i in range(n)],
+    "raw": ["ch%d" % i for i in range(n)],
+    "unused": 0,
+    "a": rng.integers(0, 10, n),
+    "b": rng.integers(0, 10, n),
+    "ax": np.round(rng.normal(0, 0.3, n), 3),
+    "ay": np.round(rng.normal(0, 0.3, n), 3),
+    "az": np.round(1 + rng.normal(0, 0.05, n), 3),
+})
+
+# the flaws the lecture cleans up
+frame.loc[5:9, "temp"] = np.nan
+frame.loc[20:22, "hum"] = np.nan
+frame.loc[30, "temp"] = -999
+frame.loc[40, "status"] = "NA"
+frame = pd.concat([frame, frame.iloc[[1, 2]]], ignore_index=True)
+
+frame.to_csv("log.csv", index=False)
+frame.to_csv("big.csv", index=False)
+
+df = pd.read_csv("log.csv", na_values=["NA", "-999"])
+
+# referenced by the slides on chunked reading and joins
+def process(chunk):
+    print("chunk", chunk.shape)
+
+df1 = df.head(3)
+df2 = df.tail(3)
+meta = pd.DataFrame({"sensor_id": ["s01", "s02", "s03"],
+                     "place": ["arm", "base", "wheel"]})
+</script>
+<style>
+@page { size: 1920px 1080px; margin: 0; }
+html, body { margin: 0; padding: 0; background: #fff; }
+:root { color-scheme: light; }
+deck-stage { display: block; }
+.slide {
+  width: 1920px; height: 1080px; overflow: hidden; box-sizing: border-box;
+  break-after: page; page-break-after: always;
+}
+.slide:last-child { break-after: auto; page-break-after: auto; }
+</style>
+<link rel="stylesheet" href="cde-layout.css"></head>
+<body>
+<deck-stage>
+        <section class="slide cover" data-label="표지" data-screen-label="표지">
+          <img class="cover-logo" src="./cbnu_logo.png" alt="충북대학교">
+          <span class="cover-kicker">PYTHON 프로그래밍 · PART 2-3</span>
+          <h1 class="cover-title">Pandas</h1>
+          <p class="cover-sub">데이터프레임 활용 및 전처리</p>
+          <div class="cover-rule"></div>
+          <p class="cover-by">충북대학교 지능로봇공학과 <b>문성태 교수</b></p>
+        </section>
+
+        <section class="slide" data-label="01 Pandas 소개" data-screen-label="01 Pandas 소개">
+          <header class="head"><span class="kicker">Overview</span><span class="folio">01</span></header>
+          <h2 class="title">What is Pandas</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">NumPy 배열에 이름표를 붙여 표로 다루게 만든 라이브러리</p>
+            <div class="cols3">
+              <div class="card soft">
+                <h3 class="card-h sky">Who</h3>
+                <ul class="ul">
+                  <li><strong>Wes McKinney</strong> — 2008년 금융 데이터 분석 도구로 시작</li>
+                  <li><strong>공개</strong> — 2009년 오픈소스로 시작&nbsp; (panel data)</li>
+                  <li><strong>지금</strong> — NumFOCUS 후원, BSD 3-Clause</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3 class="card-h">Why</h3>
+                <ul class="ul">
+                  <li><strong>문제</strong> — 배열에는 열 이름도 시각도 없음</li>
+                  <li><strong>해법</strong> — 인덱스와 열 이름을 붙인 표 자료구조</li>
+                  <li><b>기능</b> — 결측 처리, 시계열, 그룹 집계가 기본 기능</li>
+                </ul>
+              </div>
+              <div class="card good">
+                <h3 class="card-h leaf">Where</h3>
+                <ul class="ul leaf">
+                  <li><strong>입력</strong> — CSV, Excel, SQL, Parquet 을 한 줄로 적재</li>
+                  <li><strong>연결</strong> — scikit-learn, statsmodels, 시각화 도구의 공통 입력</li>
+                  <li><strong>현장</strong> — 금융, 실험 데이터, 로그와 센서 분석</li>
+                </ul>
+              </div>
+            </div>
+            <p class="note"><strong>버전</strong> — 1.0 은 2020년, 2.0 은 2023년. (본 강의는 2.x 기준)</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:3%"></i></div><span class="foot-num">01 / 37</span></footer>
+        </section>
+        <section class="slide" data-label="02 왜 Pandas인가" data-screen-label="02 왜 Pandas인가">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">02</span></header>
+          <h2 class="title">왜 Pandas인가</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">NumPy 는 숫자 상자, Pandas 는 <b>이름표가 붙은 표</b></p>
+            <div class="cols">
+              <ul class="ul">
+                <li>열마다 다른 이름과 dtype</li>
+                <li>결측값(NaN)을 정식 지원</li>
+                <li>시간 인덱스, 문자열, 범주형 지원</li>
+                <li>CSV, Excel, Parquet, SQL 직접 입출력</li>
+                <li>내부는 NumPy 배열, 속도를 그대로 계승</li>
+              </ul>
+              <pre data-run="" class="code tight"><span class="k">import </span>pandas <span class="k">as </span>pd
+
+df = pd.read_csv(<span class="s">"log.csv"</span>)
+df.head()
+
+<span class="c">#         t   temp   hum status
+# 0  0.0000  21.5  40.2     ok
+# 1  0.0100  21.6  40.1     ok</span></pre>
+            </div>
+            <p class="note">센서 로그, 실험 기록, 설문 응답처럼 <b>행과 열에 의미가 있는 데이터</b>가 대상</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:5%"></i></div><span class="foot-num">02 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="03 자료구조" data-screen-label="03 자료구조">
+          <header class="head"><span class="kicker">Overview</span><span class="folio">03</span></header>
+          <h2 class="title">Series 와 DataFrame</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">라벨이 붙은 1차원이 Series, 같은 라벨을 공유하는 열의 묶음이 DataFrame</p>
+            <figure class="fig plain" style="max-width:1500px">
+              <img src="./imgs/pd-datamodel.svg" alt="Series 와 DataFrame 자료구조" style="max-height:400px" />
+            </figure>
+            <div class="cols">
+              <ul class="ul">
+                <li><strong>Series</strong> — 값 배열 하나에 인덱스가 짝지어진 형태</li>
+                <li><strong>DataFrame</strong> — 인덱스를 공유하는 Series 들의 모음</li>
+              </ul>
+              <ul class="ul">
+                <li><strong>열 선택</strong> — df["temp"] 의 결과가 Series</li>
+                <li><strong>정렬 기준</strong> — 연산은 위치가 아니라 인덱스 기준</li>
+              </ul>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:8%"></i></div><span class="foot-num">03 / 37</span></footer>
+        </section>
+        <section class="slide" data-label="04 Series 기본" data-screen-label="04 Series 기본">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">04</span></header>
+          <h2 class="title">Series 기본</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">s = pd.Series([<span class="no">21.5</span>, <span class="no">21.6</span>, <span class="no">21.4</span>],
+              index=[<span class="s">"a"</span>, <span class="s">"b"</span>, <span class="s">"c"</span>])
+
+s[<span class="s">"b"</span>]        <span class="c"># 21.6
+</span>s.mean()      <span class="c"># 21.5
+</span>s.index       <span class="c"># Index(['a','b','c'])
+</span>s.values      <span class="c"># numpy 배열</span></pre>
+              <ul class="ul">
+                <li>1차원 배열 + <b>인덱스 라벨</b></li>
+                <li>DataFrame 의 열 하나가 Series</li>
+                <li>인덱스 기준으로 자동 정렬 후 연산</li>
+                <li>이름으로 접근, 위치를 외울 필요 없음</li>
+              </ul>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:11%"></i></div><span class="foot-num">04 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="05 DataFrame 기본" data-screen-label="05 DataFrame 기본">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">05</span></header>
+          <h2 class="title">DataFrame 기본</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">df = pd.DataFrame({
+    <span class="s">"t"</span>: [<span class="no">0.0</span>, <span class="no">0.1</span>, <span class="no">0.2</span>],
+    <span class="s">"temp"</span>: [<span class="no">21.5</span>, <span class="no">21.6</span>, <span class="no">21.4</span>],
+    <span class="s">"status"</span>: [<span class="s">"ok"</span>, <span class="s">"ok"</span>, <span class="s">"warn"</span>],
+})
+
+df.columns    <span class="c"># 열 이름
+</span>df.index      <span class="c"># 행 라벨
+</span>df.shape      <span class="c"># (3, 3)</span></pre>
+              <ul class="ul">
+                <li>2차원 표, 열 하나하나가 Series</li>
+                <li>열마다 다른 dtype 가능</li>
+                <li>index는 기본적으로 0부터의 정수</li>
+                <li>시계열은 시간을 index 로 두는 편이 유리</li>
+              </ul>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:14%"></i></div><span class="foot-num">05 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="06 데이터 불러오기" data-screen-label="06 데이터 불러오기">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">06</span></header>
+          <h2 class="title">데이터 불러오기</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">df = pd.read_csv(
+    <span class="s">"log.csv"</span>,
+    sep=<span class="s">","</span>,
+    header=<span class="no">0</span>,
+    parse_dates=[<span class="s">"timestamp"</span>],
+    dtype={<span class="s">"sensor_id"</span>: <span class="s">"category"</span>},
+    na_values=[<span class="s">"NA"</span>, <span class="s">"-999"</span>],
+)</pre>
+              <div class="grid8">
+                <div class="std"><span class="std-n">sep</span><span class="std-d">구분자, 탭은 \t</span></div>
+                <div class="std"><span class="std-n">header</span><span class="std-d">열 이름 행 번호</span></div>
+                <div class="std"><span class="std-n">names</span><span class="std-d">열 이름 직접 지정</span></div>
+                <div class="std"><span class="std-n">parse_dates</span><span class="std-d">시간으로 변환할 열</span></div>
+                <div class="std"><span class="std-n">dtype</span><span class="std-d">열별 타입 고정</span></div>
+                <div class="std"><span class="std-n">na_values</span><span class="std-d">결측로 간주할 값</span></div>
+              </div>
+            </div>
+            <p class="note">센서 로그는 <b>-999, NA, 빈 문자열</b> 같은 값이 결측 표시로 쓰인다. 읽는 순간 처리하는 편이 안전.</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:16%"></i></div><span class="foot-num">06 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="07 대용량 읽기" data-screen-label="07 대용량 읽기">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">07</span></header>
+          <h2 class="title">대용량 읽기 옵션</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">pd.read_csv(<span class="s">"big.csv"</span>,
+            usecols=[<span class="s">"t"</span>, <span class="s">"ax"</span>])
+<span class="c"># 필요한 열만
+
+</span>pd.read_csv(<span class="s">"big.csv"</span>, nrows=<span class="no">1000</span>)
+<span class="c"># 앞부분만 미리보기</span></pre>
+              <pre data-run="" class="code tight">reader = pd.read_csv(
+    <span class="s">"big.csv"</span>, chunksize=<span class="no">100_000</span>)
+
+<span class="k">for </span>chunk <span class="k">in </span>reader:
+    process(chunk)
+<span class="c"># 나누어 처리하면 메모리가 안전</span></pre>
+            </div>
+            <div class="cols">
+              <ul class="ul">
+                <li>열을 줄이는 것이 가장 큰 절감</li>
+                <li>먼저 nrows 로 구조 확인</li>
+              </ul>
+              <ul class="ul">
+                <li>chunksize 는 반복자를 반환</li>
+                <li>반복해 읽는다면 parquet 으로 전환</li>
+              </ul>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:19%"></i></div><span class="foot-num">07 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="08 데이터 훑어보기" data-screen-label="08 데이터 훑어보기">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">08</span></header>
+          <h2 class="title">데이터 훑어보기</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">df.head()      <span class="c"># 앞 5행
+</span>df.tail(<span class="no">3</span>)    <span class="c"># 마지막 3행
+</span>df.sample(<span class="no">5</span>)  <span class="c"># 무작위 5행
+</span>df.shape       <span class="c"># (행, 열)
+</span>df.info()      <span class="c"># dtype, 결측, 메모리
+</span>df.describe()  <span class="c"># 수치 요약
+</span>df.dtypes      <span class="c"># 열별 타입</span></pre>
+              <div class="card soft">
+                <h3 class="card-h sky">적재 직후 루틴</h3>
+                <ol class="steps">
+                  <li>shape 로 크기 확인</li>
+                  <li>info 로 dtype 과 결측 확인</li>
+                  <li>describe 로 값 범위 확인</li>
+                </ol>
+              </div>
+            </div>
+            <p class="note">describe에서 <b>min 이 -999, max 가 99999</b> 라면 결측 표시이거나 이상치.</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:22%"></i></div><span class="foot-num">08 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="09 열 선택과 추가" data-screen-label="09 열 선택과 추가">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">09</span></header>
+          <h2 class="title">열 선택과 추가</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre class="code tight">df[<span class="s">"temp"</span>]            <span class="c"># Series
+</span>df[[<span class="s">"temp"</span>, <span class="s">"hum"</span>]]  <span class="c"># DataFrame
+
+</span>df[<span class="s">"temp_f"</span>] = df[<span class="s">"temp"</span>] * <span class="no">9</span> / <span class="no">5</span> + <span class="no">32</span>
+
+df = df.drop(columns=[<span class="s">"unused"</span>])
+df = df.rename(columns={<span class="s">"temp"</span>: <span class="s">"temp_c"</span>})</pre>
+              <ul class="ul">
+                <li>대괄호 하나는 Series, 둘은 DataFrame</li>
+                <li>열 생성은 바로 대입</li>
+                <li>drop 과 rename 은 <b>새 객체를 반환</b></li>
+                <li>열 이름은 소문자와 밑줄로 통일</li>
+              </ul>
+            </div>
+            <pre data-run="" class="code tight">df.columns = df.columns.str.strip().str.lower()   <span class="c"># 열 이름 일괄 정리</span></pre>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:24%"></i></div><span class="foot-num">09 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="10 loc와 iloc" data-screen-label="10 loc와 iloc">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">10</span></header>
+          <h2 class="title">행 선택: loc와 iloc</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <div class="card soft">
+                <h3 class="card-h sky">loc — 라벨 기준</h3>
+                <pre data-run="" class="code on-soft tight">df.loc[<span class="no">0</span>]
+df.loc[<span class="no">0</span>:<span class="no">2</span>]   <span class="c"># 0,1,2 끝 포함
+</span>df.loc[df[<span class="s">"temp"</span>] &gt; <span class="no">30</span>, <span class="s">"temp"</span>]</pre>
+              </div>
+              <div class="card">
+                <h3 class="card-h sky">iloc — 위치 기준</h3>
+                <pre data-run="" class="code tight">df.iloc[<span class="no">0</span>]
+df.iloc[<span class="no">0</span>:<span class="no">2</span>]  <span class="c"># 0,1 끝 제외
+</span>df.iloc[<span class="no">0</span>, <span class="no">1</span>]  <span class="c"># 첫 행 둘째 열</span></pre>
+              </div>
+            </div>
+            <p class="note"><b>loc 슬라이스는 끝을 포함, iloc 는 미포함.</b> 파이썬 리스트와 달라 가장 자주 틀리는 지점.</p>
+            <p class="note">시간을 인덱스로 두면 <b>df.loc["2026-08-21"]</b> 처럼 날짜 문자열로도 절단 가능.</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:27%"></i></div><span class="foot-num">10 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="11 조건 필터링" data-screen-label="11 조건 필터링">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">11</span></header>
+          <h2 class="title">조건 필터링</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <div class="card">
+                <h3 class="card-h">불리언 인덱싱</h3>
+                <pre data-run="" class="code on-soft tight">df[df[<span class="s">"temp"</span>] &gt; <span class="no">30</span>]
+
+df[(df[<span class="s">"temp"</span>] &gt; <span class="no">30</span>) &amp;
+   (df[<span class="s">"hum"</span>] &lt; <span class="no">50</span>)]
+
+df[df[<span class="s">"status"</span>].isin([<span class="s">"ok"</span>, <span class="s">"warn"</span>])]
+
+df[df[<span class="s">"temp"</span>].between(<span class="no">10</span>, <span class="no">40</span>)]</pre>
+                <p class="note">NumPy 와 동일 — <b>and / or 대신 &amp; | 와 괄호</b>.</p>
+              </div>
+              <div class="card good">
+                <h3 class="card-h leaf">query로 읽기 쉽게</h3>
+                <pre data-run="" class="code on-soft tight">df.query(<span class="s">"temp &gt; 30 and hum &lt; 50"</span>)
+
+limit = <span class="no">30</span>
+df.query(<span class="s">"temp &gt; @limit"</span>)</pre>
+                <p class="note">조건이 길어지면 query 가 읽기 좋음. 파이썬 변수는 <b>@이름</b>으로 전달.</p>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:30%"></i></div><span class="foot-num">11 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="12 연습문제 1" data-screen-label="12 연습문제 1">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">12</span></header>
+          <h2 class="title">연습문제 1</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">df 에서 온도가 30 이상이면서 습도가 40 미만인 행만 골라 몇 개인지 구하시오.</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">df.head()
+df.shape
+
+<span class="err"># IMPLEMENT HERE</span></pre>
+              <div class="run-slot"><div data-run-out=""></div></div>
+            </div>
+          </div>
+          <script type="text/x-run-setup">
+df = frame.drop(columns=["unused", "a", "b", "tag", "raw", "ax", "ay", "az"]).copy()
+          </script>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:32%"></i></div><span class="foot-num">12 / 37</span></footer>
+        </section>
+        <section class="slide" data-label="13 SettingWithCopyWarning" data-screen-label="13 SettingWithCopyWarning">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">13</span></header>
+          <h2 class="title">SettingWithCopyWarning</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">사본에 대입하면 원본은 그대로. 경고는 그 사실을 알리는 신호</p>
+            <div class="cols">
+              <div class="card warn" style="padding:22px 26px">
+                <h3 class="card-h coral">연쇄 인덱싱</h3>
+                <pre data-run class="code on-soft xs">sub = df[df[<span class="s">"temp"</span>] &gt; <span class="no">30</span>]
+sub[<span class="s">"temp"</span>] = <span class="no">0</span>            <span class="c"># 경고</span>
+
+df[<span class="s">"temp"</span>].<span class="fn">max</span>()           <span class="c"># 원본은 그대로</span></pre>
+              </div>
+              <div class="card good" style="padding:22px 26px">
+                <h3 class="card-h leaf">loc 로 한 번에</h3>
+                <pre data-run class="code on-soft xs">df.loc[df[<span class="s">"temp"</span>] &gt; <span class="no">30</span>, <span class="s">"temp"</span>] = <span class="no">0</span>
+
+df[<span class="s">"temp"</span>].<span class="fn">max</span>()           <span class="c"># 반영됨</span></pre>
+              </div>
+            </div>
+            <ol class="steps" style="gap:14px">
+              <li>df[조건] 이 뷰인지 사본인지 pandas 도 보장하지 못함</li>
+              <li>연쇄 인덱싱은 두 단계. 첫 단계가 사본이면 둘째 단계의 대입은 폐기</li>
+              <li>loc 로 행과 열을 한 번에 지정하면 원본을 직접 수정. 사본이 필요하면 .copy()</li>
+            </ol>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:35%"></i></div><span class="foot-num">13 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="14 결측값 탐지" data-screen-label="14 결측값 탐지">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">14</span></header>
+          <h2 class="title">결측값 탐지</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">df.isna().sum()
+<span class="c"># 열별 결측 개수
+
+</span>df.isna().mean()
+<span class="c"># 열별 결측 비율
+
+</span>df.isna().any(axis=<span class="no">1</span>).sum()
+<span class="c"># 결측을 하나라도 포함한 행 수</span></pre>
+              <ul class="ul">
+                <li>isna 와 isnull 은 같은 함수</li>
+                <li>결측 <b>비율</b>을 먼저 확인. 1% 와 60% 는 대응이 다름</li>
+                <li>열별로 볼지 행별로 볼지 구분</li>
+                <li>결측이 몰린 구간이 있는지 시간축으로 확인</li>
+              </ul>
+            </div>
+            <pre data-run="" class="code tight">df[df.isna().any(axis=<span class="no">1</span>)].head()   <span class="c"># 결측이 있는 행을 직접 들여다본다</span></pre>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:38%"></i></div><span class="foot-num">14 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="15 결측값 처리" data-screen-label="15 결측값 처리">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">15</span></header>
+          <h2 class="title">결측값 처리 전략</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">df.dropna()
+df.dropna(subset=[<span class="s">"temp"</span>])
+df.dropna(axis=<span class="no">1</span>, thresh=<span class="no">100</span>)
+
+df[<span class="s">"temp"</span>].fillna(<span class="no">0</span>)
+df[<span class="s">"temp"</span>].ffill()
+df[<span class="s">"temp"</span>].bfill()
+df[<span class="s">"temp"</span>].interpolate()</pre>
+              <div class="grid8">
+                <div class="std"><span class="std-n">dropna</span><span class="std-d">버려도 될 때</span></div>
+                <div class="std"><span class="std-n">fillna</span><span class="std-d">기본값이 명확할 때</span></div>
+                <div class="std"><span class="std-n">ffill</span><span class="std-d">직전 값을 뒤로 끌기, 상태 유지</span></div>
+                <div class="std"><span class="std-n">bfill</span><span class="std-d">다음 값을 앞으로 당기기, 시작부 결측</span></div>
+                <div class="std"><span class="std-n">interpolate</span><span class="std-d">연속 신호, 선형 보간</span></div>
+              </div>
+            </div>
+            <p class="note"><b>방향</b> — ffill 은 마지막 관측을 이후로 전파, bfill 은 다음 관측을 이전으로 소급. 맨 앞 결측은 ffill 로, 맨 뒤 결측은 bfill 로 채울 수 없음</p>
+            <p class="note"><b>기본 전략</b> — 센서 시계열은 보간, 상태 플래그는 ffill, 범주형은 미상 범주 추가</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:41%"></i></div><span class="foot-num">15 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="16 연습문제 2" data-screen-label="16 연습문제 2">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">16</span></header>
+          <h2 class="title">연습문제 2</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">temp 에 결측이 있다. 결측 개수를 센 뒤 앞뒤 값으로 채우고, 남은 결측이 없는지 확인하시오.</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">df["temp"].head(<span class="no">12</span>)
+
+<span class="err"># IMPLEMENT HERE</span></pre>
+              <div class="run-slot"><div data-run-out=""></div></div>
+            </div>
+          </div>
+          <script type="text/x-run-setup">
+df = frame.drop(columns=["unused", "a", "b", "tag", "raw", "ax", "ay", "az"]).copy()
+df.loc[3:6, "temp"] = np.nan
+df.loc[20, "temp"] = np.nan
+          </script>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:43%"></i></div><span class="foot-num">16 / 37</span></footer>
+        </section>
+        <section class="slide" data-label="17 중복 처리" data-screen-label="17 중복 처리">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">17</span></header>
+          <h2 class="title">중복 처리</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">df.duplicated().sum()
+<span class="c"># 완전히 같은 행의 개수
+
+</span>df = df.drop_duplicates()
+
+df = df.drop_duplicates(
+    subset=[<span class="s">"t"</span>], keep=<span class="s">"last"</span>)
+<span class="c"># 같은 시각은 마지막 값만 남긴다</span></pre>
+              <ul class="ul">
+                <li>subset 으로 <b>중복 판단 기준 열</b>을 지정</li>
+                <li>keep은 first, last, False 중 선택</li>
+                <li>keep=False 는 중복 행을 전부 제거</li>
+                <li>로그 병합 후에는 중복 확인 필수</li>
+              </ul>
+            </div>
+            <p class="note">센서 로그에서 <b>같은 타임스탬프가 두 번</b> 나오면 재전송이거나 버퍼 중복. 지우기 전에 원인 확인.</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:46%"></i></div><span class="foot-num">17 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="18 자료형 정리" data-screen-label="18 자료형 정리">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">18</span></header>
+          <h2 class="title">자료형 정리</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <div class="fig-stack" style="gap:20px">
+                <pre data-run class="code xs">raw = pd.Series([<span class="s">"21.5"</span>, <span class="s">"21.6"</span>, <span class="s">"n/a"</span>, <span class="s">"-999"</span>])
+num = pd.to_numeric(raw, errors=<span class="s">"coerce"</span>)
+
+<span class="fn">print</span>(num.tolist())
+
+<span class="k">try</span>:
+    pd.to_numeric(raw, errors=<span class="s">"raise"</span>)
+<span class="k">except</span> ValueError <span class="k">as</span> err:
+    <span class="fn">print</span>(<span class="s">"raise:"</span>, err)</pre>
+                <ul class="ul" style="gap:12px">
+                  <li><strong>errors="raise"</strong> — 기본값. 숫자로 못 바꾸는 값이 하나라도 있으면 예외</li>
+                  <li><strong>errors="coerce"</strong> — 실패한 값만 NaN 으로 바꾸고 나머지는 진행</li>
+                  <li><strong>주의</strong> — 센티널 -999 는 숫자라 통과. 범위 검사로 따로 처리</li>
+                </ul>
+              </div>
+              <div class="fig-stack" style="gap:20px">
+                <pre data-run class="code xs">s = df[<span class="s">"status"</span>]
+c = s.astype(<span class="s">"category"</span>)
+
+use = df.memory_usage(deep=<span class="k">True</span>).<span class="fn">sum</span>()
+
+<span class="fn">print</span>(<span class="s">"object  "</span>, s.memory_usage(deep=<span class="k">True</span>))
+<span class="fn">print</span>(<span class="s">"category"</span>, c.memory_usage(deep=<span class="k">True</span>))
+<span class="fn">print</span>(<span class="s">"total MB"</span>, round(use / <span class="no">1</span>e6, <span class="no">2</span>))</pre>
+                <ul class="ul" style="gap:12px">
+                  <li><strong>memory_usage</strong> — 열별 바이트 사용량. sum() 으로 전체 합산</li>
+                  <li><strong>deep=True</strong> — 문자열 내용까지 계산. 기본값은 포인터만 세어 과소 집계</li>
+                  <li><strong>category</strong> — 반복 문자열을 코드 + 사전으로 저장. 종류가 적을수록 절감 폭이 큼</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:49%"></i></div><span class="foot-num">18 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="19 문자열 처리" data-screen-label="19 문자열 처리">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">19</span></header>
+          <h2 class="title">문자열 처리 (.str)</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">s = df[<span class="s">"status"</span>]
+
+s.str.strip()
+s.str.lower()
+s.str.contains(<span class="s">"err"</span>)
+s.str.startswith(<span class="s">"warn"</span>)
+s.str.replace(<span class="s">"_"</span>, <span class="s">"-"</span>, regex=<span class="k">False</span>)
+s.str.len()</pre>
+              <pre data-run="" class="code tight">df[<span class="s">"code"</span>] = (
+    df[<span class="s">"tag"</span>].str.split(<span class="s">"-"</span>).str[<span class="no">0</span>])
+
+df[<span class="s">"num"</span>] = (
+    df[<span class="s">"raw"</span>].str.extract(<span class="s">r"(\d+)"</span>))</pre>
+            </div>
+            <p class="note"><b>.str 접근자</b>로 파이썬 문자열 메서드를 열 전체에 한 번에 적용. 결측은 자동으로 건너뜀</p>
+            <p class="note">센서 로그의 <b>앞뒤 공백과 대소문자 혼재</b>가 가장 흔한 오염. 적재 직후 strip 과 lower 로 통일</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:51%"></i></div><span class="foot-num">19 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="20 날짜 시간 처리" data-screen-label="20 날짜 시간 처리">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">20</span></header>
+          <h2 class="title">날짜 시간 처리</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre class="code tight">df[<span class="s">"t"</span>] = pd.to_datetime(df[<span class="s">"t"</span>])
+
+df[<span class="s">"t"</span>].dt.year
+df[<span class="s">"t"</span>].dt.hour
+df[<span class="s">"t"</span>].dt.dayofweek
+df[<span class="s">"t"</span>].dt.floor(<span class="s">"1min"</span>)
+
+df = df.set_index(<span class="s">"t"</span>).sort_index()
+df.loc[<span class="s">"2026-08-21"</span>]</pre>
+              <ul class="ul">
+                <li>문자열을 <b>datetime64</b>로 바꿔야 시간 기능 사용 가능</li>
+                <li>.dt 접근자로 연, 월, 시, 요일 추출</li>
+                <li>시간을 index 로 두면 구간 자르기가 쉬움</li>
+                <li>리샘플링은 반드시 <b>정렬</b> 후에</li>
+              </ul>
+            </div>
+            <pre data-run="" class="code tight">df[<span class="s">"t"</span>] = pd.to_datetime(df[<span class="s">"t"</span>], unit=<span class="s">"s"</span>, utc=<span class="k">True</span>)   <span class="c"># 유닉스 시각 입력</span></pre>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:54%"></i></div><span class="foot-num">20 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="21 연습문제 3" data-screen-label="21 연습문제 3">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">21</span></header>
+          <h2 class="title">연습문제 3</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">t 는 유닉스 시각(초)이다. 시간 인덱스로 바꾸고 시(hour)별 평균 온도를 구하시오.</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">df[["t", "temp"]].head()
+
+<span class="err"># IMPLEMENT HERE</span></pre>
+              <div class="run-slot"><div data-run-out=""></div></div>
+            </div>
+          </div>
+          <script type="text/x-run-setup">
+df = frame.drop(columns=["unused", "a", "b", "tag", "raw", "ax", "ay", "az"]).copy()
+          </script>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:57%"></i></div><span class="foot-num">21 / 37</span></footer>
+        </section>
+        <section class="slide" data-label="22 정렬과 순위" data-screen-label="22 정렬과 순위">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">22</span></header>
+          <h2 class="title">정렬과 순위</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">정렬은 새 객체를 반환, 순위는 동점 처리 규칙이 핵심</p>
+            <div class="cols">
+              <pre data-run class="code xs">top = df.sort_values([<span class="s">"day"</span>, <span class="s">"temp"</span>],
+                     ascending=[<span class="k">True</span>, <span class="k">False</span>])
+<span class="fn">print</span>(top[[<span class="s">"day"</span>, <span class="s">"temp"</span>]].head(<span class="no">3</span>).to_string())
+
+t = pd.Series([<span class="no">21.5</span>, <span class="no">21.6</span>, <span class="no">21.5</span>])
+<span class="k">for</span> m <span class="k">in</span> (<span class="s">"average"</span>, <span class="s">"min"</span>, <span class="s">"dense"</span>):
+    <span class="fn">print</span>(m, t.rank(method=m).tolist())</pre>
+              <div class="fig-stack" style="gap:20px">
+                <table class="tbl">
+                  <thead><tr><th>값</th><th>average</th><th>min</th><th>dense</th></tr></thead>
+                  <tbody>
+                    <tr><td>21.5</td><td>1.5</td><td>1</td><td>1</td></tr>
+                    <tr><td>21.6</td><td>3</td><td>3</td><td>2</td></tr>
+                    <tr><td>21.5</td><td>1.5</td><td>1</td><td>1</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="cols">
+              <ul class="ul" style="gap:16px">
+                <li><strong>sort_values</strong> — by, ascending 을 리스트로 주면 열마다 방향 지정</li>
+                <li><strong>na_position</strong> — 결측 위치 선택. 기본은 last</li>
+              </ul>
+              <ul class="ul" style="gap:16px">
+                <li><strong>rank(method)</strong> — average 나눔, min 낮은 순위, dense 연속</li>
+                <li><strong>nlargest(n)</strong> — 상위 n 개만 추출. 인덱스는 원본 유지</li>
+              </ul>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:59%"></i></div><span class="foot-num">22 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="23 apply와 map" data-screen-label="23 apply와 map">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">23</span></header>
+          <h2 class="title">apply와 map</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run class="code xs">s = df[<span class="s">"status"</span>].map({<span class="s">"ok"</span>: <span class="no">0</span>, <span class="s">"warn"</span>: <span class="no">1</span>})
+<span class="fn">print</span>(s.head(<span class="no">4</span>).tolist(), int(s.isna().<span class="fn">sum</span>()))
+
+r = df.apply(<span class="k">lambda</span> x: x[<span class="s">"a"</span>] + x[<span class="s">"b"</span>], axis=<span class="no">1</span>)
+<span class="fn">print</span>(r.head(<span class="no">3</span>).tolist())
+
+m = df[[<span class="s">"a"</span>, <span class="s">"b"</span>]].apply(<span class="k">lambda</span> c: c.<span class="fn">max</span>())
+<span class="fn">print</span>(m.to_dict())</pre>
+              <div style="display:flex;flex-direction:column;gap:20px;min-width:0">
+                <table class="tbl">
+                  <thead><tr><th>호출</th><th>전달 단위</th><th>반환</th></tr></thead>
+                  <tbody>
+                    <tr><td><strong>s.map(dict)</strong></td><td>원소 하나</td><td>Series</td></tr>
+                    <tr><td><strong>df.apply(f, axis=1)</strong></td><td>행 Series</td><td>Series</td></tr>
+                    <tr><td><strong>df.map(f)</strong></td><td>원소 하나</td><td>DataFrame</td></tr>
+                  </tbody>
+                </table>
+                <p class="note">map 은 Series 전용, apply 는 축 단위, df.map 은 전 원소 단위</p>
+              </div>
+            </div>
+            <ul class="ul" style="gap:18px">
+              <li><strong>map</strong> — 함수, dict, Series 를 인자로 받음. 대응 키가 없으면 NaN</li>
+              <li><strong>apply</strong> — axis=0 은 열 Series, axis=1 은 행 Series 를 함수에 전달</li>
+              <li><strong>DataFrame.map</strong> — 전 원소에 적용. pandas 2.1 이전 이름은 applymap</li>
+              <li><strong>성능</strong> — apply 는 파이썬 루프. 벡터 연산, 내장 메서드, map, apply 순으로 검토</li>
+            </ul>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:62%"></i></div><span class="foot-num">23 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="24 groupby 개념" data-screen-label="24 groupby 개념">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">24</span></header>
+          <h2 class="title">groupby 개념</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">나누고(split), 각각 계산하고(apply), 다시 합친다(combine).</p>
+            <figure class="fig plain">
+              <img src="./imgs/pd-groupby.svg" alt="split-apply-combine 도식">
+              <figcaption>왼쪽 원본을 범주별로 나누고(split), 그룹마다 계산해(apply), 한 표로 합친다(combine).</figcaption>
+            </figure>
+            <pre data-run="" class="code tight">df.groupby(<span class="s">"sensor_id"</span>)[<span class="s">"temp"</span>].mean()      <span class="c"># 센서별 평균 온도
+</span>df.groupby([<span class="s">"day"</span>, <span class="s">"sensor_id"</span>]).size()   <span class="c"># 날짜별 센서별 샘플 수</span></pre>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:65%"></i></div><span class="foot-num">24 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="25 groupby 집계" data-screen-label="25 groupby 집계">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">25</span></header>
+          <h2 class="title">groupby 집계</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <pre data-run="" class="code tight">summary = df.groupby(<span class="s">"sensor_id"</span>).agg(
+    temp_mean=(<span class="s">"temp"</span>, <span class="s">"mean"</span>),
+    temp_max=(<span class="s">"temp"</span>, <span class="s">"max"</span>),
+    temp_std=(<span class="s">"temp"</span>, <span class="s">"std"</span>),
+    n=(<span class="s">"temp"</span>, <span class="s">"size"</span>),
+).reset_index()</pre>
+            <div class="cols">
+              <ul class="ul">
+                <li>이름 붙은 집계로 <b>결과 열 이름을 직접 지정</b></li>
+                <li>문자열 대신 함수 전달 가능</li>
+              </ul>
+              <ul class="ul">
+                <li>reset_index 로 그룹 키를 다시 열로 환원</li>
+                <li>size 는 결측 포함, count 는 결측 제외</li>
+              </ul>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:68%"></i></div><span class="foot-num">25 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="26 연습문제 4" data-screen-label="26 연습문제 4">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">26</span></header>
+          <h2 class="title">연습문제 4</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">센서별 평균 온도와 표본 수를 구하고, 평균이 가장 높은 센서를 찾으시오.</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">df[["sensor_id", "temp"]].head()
+
+<span class="err"># IMPLEMENT HERE</span></pre>
+              <div class="run-slot"><div data-run-out=""></div></div>
+            </div>
+          </div>
+          <script type="text/x-run-setup">
+df = frame.drop(columns=["unused", "a", "b", "tag", "raw", "ax", "ay", "az"]).copy()
+          </script>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:70%"></i></div><span class="foot-num">26 / 37</span></footer>
+        </section>
+        <section class="slide" data-label="27 transform과 filter" data-screen-label="27 transform과 filter">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">27</span></header>
+          <h2 class="title">transform과 filter</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">그룹 연산의 세 갈래 — agg, transform, filter</p>
+            <div class="cols">
+              <div class="card soft">
+                <h3 class="card-h sky">transform — 행 수 유지</h3>
+                <pre data-run class="code on-soft xs">g = df.groupby(<span class="s">"sensor_id"</span>)[<span class="s">"temp"</span>]
+z = (df[<span class="s">"temp"</span>] - g.transform(<span class="s">"mean"</span>))
+z = z / g.transform(<span class="s">"std"</span>)
+<span class="fn">print</span>(z.head(<span class="no">3</span>).round(<span class="no">2</span>).tolist())</pre>
+                <p class="formula"><span data-tex="z_{i} = \frac{x_{i} - \mu_{g}}{\sigma_{g}}"></span></p>
+                <p class="note">그룹 평균과 표준편차를 각 행에 되돌려 센서별 z 점수 계산</p>
+              </div>
+              <div class="card good">
+                <h3 class="card-h leaf">filter — 그룹 통째 선별</h3>
+                <pre data-run class="code on-soft tight">sz = df[<span class="s">"sensor_id"</span>].value_counts()
+big = df.groupby(<span class="s">"sensor_id"</span>).filter(
+    <span class="k">lambda</span> d: <span class="fn">len</span>(d) &gt;= <span class="no">200</span>)
+<span class="fn">print</span>(sz.to_dict(), <span class="fn">len</span>(df), <span class="fn">len</span>(big))</pre>
+                <ul class="ul leaf" style="gap:14px">
+                  <li>인자는 그룹 DataFrame 전체</li>
+                  <li>반환은 True 또는 False 하나</li>
+                  <li>행 수는 줄고 원본 인덱스는 유지</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:73%"></i></div><span class="foot-num">27 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="28 피벻과 재구조화" data-screen-label="28 피벻과 재구조화">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">28</span></header>
+          <h2 class="title">피벻과 재구조화</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">pd.pivot_table(df,
+    index=<span class="s">"day"</span>,
+    columns=<span class="s">"sensor_id"</span>,
+    values=<span class="s">"temp"</span>,
+    aggfunc=<span class="s">"mean"</span>)
+<span class="c"># wide: 행=날짜, 열=센서</span></pre>
+              <pre data-run="" class="code tight">df.melt(
+    id_vars=[<span class="s">"t"</span>],
+    var_name=<span class="s">"channel"</span>,
+    value_name=<span class="s">"value"</span>)
+<span class="c"># long: t, channel, value</span></pre>
+            </div>
+            <div class="cols">
+              <div class="card">
+                <h3 class="card-h sky">wide 형식</h3>
+                <p class="note">사람이 보기 좋고 보고서에 바로 사용. 대신 열이 계속 증가</p>
+              </div>
+              <div class="card">
+                <h3 class="card-h sky">long 형식</h3>
+                <p class="note">그룹 연산과 시각화에 유리. 채널이 늘어도 구조 유지</p>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:76%"></i></div><span class="foot-num">28 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="29 데이터 결합" data-screen-label="29 데이터 결합">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">29</span></header>
+          <h2 class="title">데이터 결합</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">pd.concat([df1, df2], axis=<span class="no">0</span>)
+<span class="c"># 같은 구조를 아래로 이어붙인다
+
+</span>pd.concat([df1, df2], axis=<span class="no">1</span>)
+<span class="c"># 인덱스를 맞춰 옆으로 붙인다
+
+</span>df.merge(meta, on=<span class="s">"sensor_id"</span>,
+         how=<span class="s">"left"</span>)</pre>
+              <div class="grid8">
+                <div class="std"><span class="std-n">inner</span><span class="std-d">양쪽에 다 있는 키</span></div>
+                <div class="std"><span class="std-n">left</span><span class="std-d">왼쪽 기준, 가장 흔함</span></div>
+                <div class="std"><span class="std-n">right</span><span class="std-d">오른쪽 기준</span></div>
+                <div class="std"><span class="std-n">outer</span><span class="std-d">합집합, 빈칸은 NaN</span></div>
+              </div>
+            </div>
+            <p class="note">결합 전에 <b>키 중복 여부를</b> 확인 필수. 중복 키는 행 수를 폭증. <b>validate="m:1"</b>로 자동 검사 가능</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:78%"></i></div><span class="foot-num">29 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="30 리샘플링" data-screen-label="30 리샘플링">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">30</span></header>
+          <h2 class="title">시계열 리샘플링</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run="" class="code tight">df = df.set_index(<span class="s">"t"</span>).sort_index()
+
+df[<span class="s">"temp"</span>].resample(<span class="s">"1min"</span>).mean()
+<span class="c"># 다운샘플링: 줄여서 집계
+
+</span>df[<span class="s">"temp"</span>].resample(<span class="s">"1s"</span>).interpolate()
+<span class="c"># 업샘플링: 늘려서 보간
+
+</span>df[<span class="s">"temp"</span>].resample(<span class="s">"1h"</span>).agg(
+    [<span class="s">"mean"</span>, <span class="s">"max"</span>, <span class="s">"count"</span>])</pre>
+              <ul class="ul">
+                <li>시간 인덱스가 있어야 사용 가능</li>
+                <li>규칙 문자: s, min, h, D, W, M</li>
+                <li>불규칙한 샘플링을 <b>균일한 계열로</b> 바꾸는 도구</li>
+                <li>count 를 함께 보면 빈 구간 발견 가능</li>
+              </ul>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:81%"></i></div><span class="foot-num">30 / 37</span></footer>
+          <script type="text/x-run-setup">
+df["t"] = pd.to_datetime(df["t"], unit="s")
+df = df.drop_duplicates("t")
+          </script>
+        </section>
+
+        <section class="slide" data-label="31 롤링 윈도우" data-screen-label="31 롤링 윈도우">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">31</span></header>
+          <h2 class="title">롤링 윈도우</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="formula" style="margin-top:6px">
+              <span data-tex="\bar{x}_{t} = \frac{1}{w} \sum_{k=0}^{w-1} x_{t-k}"></span>
+            </div>
+            <div class="cols">
+              <pre data-run="" class="code tight">df[<span class="s">"ma"</span>] = df[<span class="s">"temp"</span>].rolling(
+    <span class="no">5</span>, min_periods=<span class="no">1</span>).mean()
+<span class="c"># 5샘플 이동평균
+
+</span>df[<span class="s">"sd"</span>] = df[<span class="s">"temp"</span>].rolling(<span class="no">30</span>).std()
+<span class="c"># 이동 표준편차, 이상 감지용
+
+</span>df[<span class="s">"ewm"</span>] = df[<span class="s">"temp"</span>].ewm(span=<span class="no">10</span>).mean()
+<span class="c"># 지수 가중 이동평균</span></pre>
+              <ul class="ul">
+                <li>창 크기는 <b>샘플링 주파수 기준</b>으로 결정</li>
+                <li>100Hz에서 1초 평균이면 창 크기는 100</li>
+                <li>min_periods 를 빼면 앞부분이 전부 NaN</li>
+                <li>이동평균은 단순하지만 가장 자주 쓰는 필터</li>
+              </ul>
+            </div>
+            <p class="note">이동평균은 <b>지연을 만든다는 점에 주의.</b> 실시간 제어에 쓸 때는 지연량을 계산해 보상</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:84%"></i></div><span class="foot-num">31 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="32 연습문제 5" data-screen-label="32 연습문제 5">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">32</span></header>
+          <h2 class="title">연습문제 5</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">1분 평균으로 리샘플링한 값과 5샘플 이동평균을 각각 구해 앞 5개를 비교하시오.</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">df.index[:<span class="no">3</span>]
+df["temp"].head()
+
+<span class="err"># IMPLEMENT HERE</span></pre>
+              <div class="run-slot"><div data-run-out=""></div></div>
+            </div>
+          </div>
+          <script type="text/x-run-setup">
+df = frame.drop(columns=["unused", "a", "b", "tag", "raw", "ax", "ay", "az"]).copy()
+df["t"] = pd.to_datetime(df["t"], unit="s")
+df = df.drop_duplicates("t").set_index("t").sort_index()
+          </script>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:86%"></i></div><span class="foot-num">32 / 37</span></footer>
+        </section>
+        <section class="slide" data-label="33 결과 저장" data-screen-label="33 결과 저장">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">33</span></header>
+          <h2 class="title">결과 저장</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre class="code tight">df.to_csv(<span class="s">"clean.csv"</span>, index=<span class="k">False</span>)
+
+df.to_parquet(<span class="s">"clean.parquet"</span>)
+
+df.to_excel(<span class="s">"report.xlsx"</span>, index=<span class="k">False</span>)
+
+df.to_json(<span class="s">"clean.json"</span>,
+           orient=<span class="s">"records"</span>)</pre>
+              <div class="card warn">
+                <h3 class="card-h coral">index=False를 잊지 않는다</h3>
+                <pre class="code on-soft tight"><span class="c"># index=True (기본값)
+</span>,t,temp
+<span class="no">0</span>,<span class="no">0.0</span>,<span class="no">21.5
+</span><span class="err"># 이름 없는 열이 생긴다</span></pre>
+                <p class="note">다시 읽을 때 <b>Unnamed: 0</b> 열이 생기는 원인</p>
+              </div>
+            </div>
+            <p class="note"><b>고르는 기준</b> — 사람이 열어볼 산출물은 CSV나 Excel, 중간 결과와 대용량은 parquet. 이유는 다음 두 장</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:89%"></i></div><span class="foot-num">33 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="34 저장 구조" data-screen-label="34 저장 구조">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">34</span></header>
+          <h2 class="title">CSV 와 Parquet</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">행으로 쌓는 CSV, 열로 묶는 Parquet</p>
+            <figure class="fig plain" style="max-width:1486px">
+              <img src="./imgs/pd-storage.svg" alt="행 저장과 열 저장 비교" style="max-height:360px" />
+            </figure>
+            <div class="cols">
+              <ul class="ul">
+                <li><strong>CSV</strong> — 한 줄이 한 행. 열 하나만 필요해도 전부 스캔</li>
+                <li><strong>Parquet</strong> — 열 덩어리로 저장. 쓰는 열만 적재</li>
+              </ul>
+              <ul class="ul">
+                <li><strong>압축</strong> — 같은 열은 값이 닮아 압축률이 높음</li>
+                <li><strong>타입</strong> — 스키마를 파일에 함께 저장</li>
+              </ul>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:92%"></i></div><span class="foot-num">34 / 37</span></footer>
+        </section>
+        <section class="slide" data-label="35 Parquet 사용" data-screen-label="35 Parquet 사용">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">35</span></header>
+          <h2 class="title">Parquet 다루기</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre class="code tight">df.to_parquet(<span class="s">"clean.parquet"</span>)
+df.to_parquet(<span class="s">"c.parquet"</span>,
+              compression=<span class="s">"zstd"</span>)
+
+pd.read_parquet(<span class="s">"clean.parquet"</span>)
+pd.read_parquet(<span class="s">"clean.parquet"</span>,
+                columns=[<span class="s">"t"</span>, <span class="s">"temp"</span>])</pre>
+              <div class="fig-stack">
+                <table class="tbl">
+                  <thead><tr><th>형식</th><th>크기</th><th>읽기 (전체 / 두 열)</th><th>타입</th></tr></thead>
+                  <tbody>
+                    <tr><td>CSV</td><td>5.4 MB</td><td>36 ms / 36 ms</td><td>유실</td></tr>
+                    <tr><td>Parquet</td><td>3.2 MB</td><td>25 ms / 3 ms</td><td>보존</td></tr>
+                    <tr><td>Parquet, float32</td><td>2.2 MB</td><td>-</td><td>보존</td></tr>
+                  </tbody>
+                </table>
+                <p class="note">6만 행 10열 로그 기준. 열이 많고 행이 길수록 격차 확대</p>
+              </div>
+            </div>
+            <div class="cols">
+              <div class="card good">
+                <h3 class="card-h leaf">이럴 때 쓴다</h3>
+                <ul class="ul leaf">
+                  <li><strong>중간 결과</strong> — 정제 단계 사이에 주고받는 파일</li>
+                  <li><strong>대용량</strong> — 열 일부만 반복해서 읽는 분석</li>
+                </ul>
+              </div>
+              <div class="card warn">
+                <h3 class="card-h coral">비용</h3>
+                <ul class="ul coral">
+                  <li><strong>이진 형식</strong> — 편집기로 열 수 없고 diff 도 불가</li>
+                  <li><strong>엔진 필요</strong> — pip install pyarrow</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:95%"></i></div><span class="foot-num">35 / 37</span></footer>
+        </section>
+        <section class="slide" data-label="36 빠른 시각화" data-screen-label="36 빠른 시각화">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">36</span></header>
+          <h2 class="title">빠른 시각화</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre class="code tight">df[<span class="s">"temp"</span>].plot()
+<span class="c"># 선 그래프
+
+</span>df[<span class="s">"temp"</span>].hist(bins=<span class="no">30</span>)
+<span class="c"># 분포 확인
+
+</span>df.plot(x=<span class="s">"t"</span>, y=[<span class="s">"ax"</span>, <span class="s">"ay"</span>, <span class="s">"az"</span>])
+<span class="c"># 다중 선 그래프
+
+</span>df.plot.scatter(x=<span class="s">"temp"</span>, y=<span class="s">"hum"</span>)</pre>
+              <ul class="ul">
+                <li>내부적으로 matplotlib 사용</li>
+                <li>탐색 단계에서 <b>빠르게 한번 보는 용도</b></li>
+                <li>보고서용 그림은 matplotlib 직접 사용</li>
+                <li>이상치는 숫자보다 그림에서 먼저 보임</li>
+              </ul>
+            </div>
+            <p class="note">전처리를 끝냈다면 <b>한 번 그려 볼 것.</b> 통계값이 멀쩡해도 그림에서 문제가 드러남</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:97%"></i></div><span class="foot-num">36 / 37</span></footer>
+        </section>
+
+        <section class="slide" data-label="37 실습 안내" data-screen-label="37 실습 안내">
+          <header class="head"><span class="kicker">Pandas</span><span class="folio">37</span></header>
+          <h2 class="title">실습 안내 (lab04)</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <ol class="steps">
+                <li>로그 CSV 적재와 품질 확인</li>
+                <li>열 이름, 자료형, 시간 인덱스 정리</li>
+                <li>결측과 중복 처리</li>
+                <li>센서별 groupby 통계표 만들기</li>
+                <li>1분 단위 리샘플링과 이동평균</li>
+                <li>정제 결과 저장</li>
+              </ol>
+              <div class="card soft">
+                <h3 class="card-h sky">체크포인트</h3>
+                <ul class="ul">
+                  <li>체인 인덱싱 경고 없이 돌아가는가</li>
+                  <li>결측 처리 방식을 설명할 수 있는가</li>
+                  <li>저장 후 다시 읽어도 같은 형태인가</li>
+                </ul>
+                <div class="chips"><span class="chip sun">30분</span><span class="chip">lab04-pandas.md</span></div>
+              </div>
+            </div>
+            <p class="note">다음: <b>Part 2-4 센서 데이터 로그 분석 종합 실습</b> — NumPy 와 Pandas 를 한 파이프라인으로 결합</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:100%"></i></div><span class="foot-num">37 / 37</span></footer>
+        </section>
+      
+</deck-stage>
+
+
+</body></html>

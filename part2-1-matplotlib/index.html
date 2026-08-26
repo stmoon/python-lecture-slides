@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Part 2-1 Matplotlib</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;family=Atkinson+Hyperlegible:wght@400;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Noto+Sans+KR:wght@400;500;700;900&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./deck.css">
+<script defer="" src="./deck.js"></script>
+<script type="text/x-deck-preamble">
+import numpy as np
+import matplotlib
+matplotlib.use("agg")
+import matplotlib.pyplot as plt
+
+rng = np.random.default_rng(0)
+
+t = np.linspace(0, 4 * np.pi, 400)
+temp = 24 + 2.5 * np.sin(t) + rng.normal(0, 0.25, t.size)
+hum = 45 - 3.0 * np.sin(t + 0.6) + rng.normal(0, 0.4, t.size)
+
+place = np.array(["A", "B", "C", "D"])
+counts = np.array([62, 41, 78, 35])
+err = rng.normal(0, 1.0, 500)
+
+gx, gy = np.meshgrid(np.linspace(0, 3, 60), np.linspace(0, 3, 40))
+grid = np.sin(gx) + np.cos(gy)
+</script>
+<style>
+@page { size: 1920px 1080px; margin: 0; }
+html, body { margin: 0; padding: 0; background: #fff; }
+:root { color-scheme: light; }
+deck-stage { display: block; }
+.slide {
+  width: 1920px; height: 1080px; overflow: hidden; box-sizing: border-box;
+  break-after: page; page-break-after: always;
+}
+.slide:last-child { break-after: auto; page-break-after: auto; }
+</style>
+<link rel="stylesheet" href="cde-layout.css"></head>
+<body>
+<deck-stage>
+        <section class="slide cover" data-label="표지" data-screen-label="표지">
+          <img class="cover-logo" src="./cbnu_logo.png" alt="충북대학교">
+          <span class="cover-kicker">PYTHON 프로그래밍 · PART 2-1</span>
+          <h1 class="cover-title">Matplotlib</h1>
+          <p class="cover-sub">다양한 그래프 그리기</p>
+          <div class="cover-rule"></div>
+          <p class="cover-by">충북대학교 지능로봇공학과 <b>문성태 교수</b></p>
+        </section>
+
+        <section class="slide" data-label="01 Matplotlib 소개" data-screen-label="01 Matplotlib 소개">
+          <header class="head"><span class="kicker">Overview</span><span class="folio">01</span></header>
+          <h2 class="title">What is Matplotlib</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">파이썬에서 그림을 코드로 그리게 만든 라이브러리</p>
+            <div class="cols3">
+              <div class="card soft" style="padding:22px 26px">
+                <h3 class="card-h sky">Who</h3>
+                <ul class="ul">
+                  <li><strong>John D. Hunter</strong> — 2003년 공개. 뇌파 데이터 확인 목적으로 개발</li>
+                  <li><strong>목표</strong> — MATLAB 없이 동등한 품질의 그림 생성</li>
+                  <li><strong>지금</strong> — NumFOCUS 후원, BSD 호환 라이선스</li>
+                </ul>
+              </div>
+              <div class="card" style="padding:22px 26px">
+                <h3 class="card-h">Why</h3>
+                <ul class="ul">
+                  <li><strong>재현성</strong> — 그림이 코드로 남아 언제든 재생성 가능</li>
+                  <li><strong>제어</strong> — 축, 눈금, 색을 항목 단위로 지정</li>
+                  <li><strong>출력</strong> — 화면, PNG, PDF, SVG 로 같은 그림</li>
+                </ul>
+              </div>
+              <div class="card good" style="padding:22px 26px">
+                <h3 class="card-h leaf">Where</h3>
+                <ul class="ul">
+                  <li><strong>기반</strong> — pandas.plot, seaborn 의 내부 엔진</li>
+                  <li><strong>현장</strong> — 논문 그림, 실험 리포트, 센서 로그 확인</li>
+                  <li><strong>사례</strong> — 화성 탐사 로버 데이터, 블랙홀 영상 공개 그림</li>
+                </ul>
+              </div>
+            </div>
+            <p class="note"><strong>버전</strong> — 3.x 가 현재 계열. 본 강의는 3.8 이후 기준</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:5%"></i></div><span class="foot-num">01 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="02 그림의 구조" data-screen-label="02 그림의 구조">
+          <header class="head"><span class="kicker">Matplotlib</span><span class="folio">02</span></header>
+          <h2 class="title">그림의 구조</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">Figure 안에 Axes, 그리는 주체는 언제나 Axes</p>
+            <div class="cols">
+              <figure class="fig plain"><img src="./imgs/mpl-anatomy.svg" alt="Figure, Axes, Axis, Artist 구조" style="max-height:260px"></figure>
+              <div class="run-slot">
+                <ul class="ul">
+                  <li><strong>Figure</strong> — 그림 전체. 크기와 저장의 단위</li>
+                  <li><strong>Axes</strong> — 그래프 한 칸. plot 의 주체</li>
+                  <li><strong>Axis</strong> — x축, y축. 눈금, 범위, 라벨 담당</li>
+                  <li><strong>Artist</strong> — 선, 점, 글자 등 그려지는 모든 것</li>
+                  <li><strong>이름 주의</strong> — 축은 Axis, Axes 는 그래프 칸</li>
+                </ul>
+                <div data-run-out=""></div>
+              </div>
+            </div>
+            <pre data-run="" class="code tight">fig, ax = plt.subplots(figsize=(<span class="no">6</span>, <span class="no">3</span>))
+ax.plot(t, temp)
+ax.set_title(<span class="s">"Figure has one Axes"</span>)</pre>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:10%"></i></div><span class="foot-num">02 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="03 두 가지 사용법" data-screen-label="03 두 가지 사용법">
+          <header class="head"><span class="kicker">Matplotlib</span><span class="folio">03</span></header>
+          <h2 class="title">두 가지 사용법</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">같은 그림을 그리는 두 가지 방식</p>
+            <div class="cols">
+              <pre data-run="" class="code tight"><span class="c"># 상태 기반 (pyplot)</span>
+plt.plot(t, temp)
+plt.xlabel(<span class="s">"time"</span>)
+
+<span class="c"># 객체지향 (권장)</span>
+fig, ax = plt.subplots()
+ax.plot(t, temp)
+ax.set_xlabel(<span class="s">"time"</span>)</pre>
+              <div class="run-slot">
+                <ul class="ul">
+                  <li><strong>상태 기반</strong> — 현재 그림에 이어서 그리기. 짧은 확인용</li>
+                  <li><strong>객체지향</strong> — fig, ax 객체를 지정해 그리기</li>
+                  <li><strong>이유</strong> — 서브플롯이 늘면 상태 기반은 대상 추적 곤란</li>
+                  <li><strong>규칙</strong> — 본 강의는 fig, ax 방식 사용</li>
+                </ul>
+                <div data-run-out=""></div>
+              </div>
+            </div>
+            <p class="note"><strong>이름 규칙</strong> — pyplot 은 xlabel, Axes 는 set_xlabel. Axes 메서드에 set_ 접두</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:14%"></i></div><span class="foot-num">03 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="04 첫 그래프" data-screen-label="04 첫 그래프">
+          <header class="head"><span class="kicker">Matplotlib</span><span class="folio">04</span></header>
+          <h2 class="title">첫 그래프</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">세 줄로 끝나는 최소 구성</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">fig, ax = plt.subplots(figsize=(<span class="no">6</span>, <span class="no">3</span>))
+ax.plot(t, temp)
+fig.savefig(<span class="s">"first.png"</span>, dpi=<span class="no">120</span>)
+
+<span class="k">import</span> os
+os.path.getsize(<span class="s">"first.png"</span>)   <span class="c"># 바이트</span></pre>
+              <div class="run-slot">
+                <ul class="ul">
+                  <li><strong>subplots</strong> — Figure 와 Axes 를 동시에 생성</li>
+                  <li><strong>figsize</strong> — 인치 단위 (가로, 세로)</li>
+                  <li><strong>savefig</strong> — 파일로 저장. 화면 없이 동작</li>
+                  <li><strong>show</strong> — 창 표시. 스크립트에서는 마지막에 한 번만</li>
+                </ul>
+                <div data-run-out=""></div>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:19%"></i></div><span class="foot-num">04 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="05 선 스타일과 마커" data-screen-label="05 선 스타일과 마커">
+          <header class="head"><span class="kicker">Matplotlib</span><span class="folio">05</span></header>
+          <h2 class="title">선 스타일과 마커</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">선 하나에 지정하는 색, 모양, 두께, 투명도</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">fig, ax = plt.subplots(figsize=(<span class="no">6</span>, <span class="no">3</span>))
+
+ax.plot(t[:<span class="no">60</span>], temp[:<span class="no">60</span>], color=<span class="s">"tab:blue"</span>,
+        linestyle=<span class="s">"--"</span>, linewidth=<span class="no">2</span>,
+        marker=<span class="s">"o"</span>, markersize=<span class="no">4</span>, alpha=<span class="no">0.8</span>)</pre>
+              <div class="run-slot">
+                <ul class="ul">
+                  <li><strong>color</strong> — 이름, tab:blue, #1f77b4 모두 가능</li>
+                  <li><strong>linestyle</strong> — "-", "--", ":", "-."</li>
+                  <li><strong>marker</strong> — "o", "s", "^", "x"</li>
+                  <li><strong>alpha</strong> — 0 투명, 1 불투명. 겹칠 때 유용</li>
+                </ul>
+                <div data-run-out=""></div>
+              </div>
+            </div>
+            <p class="note"><strong>축약형</strong> — "r--o" 처럼 결합 가능. 길어지면 가독성 저하</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:24%"></i></div><span class="foot-num">05 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="06 축과 제목" data-screen-label="06 축과 제목">
+          <header class="head"><span class="kicker">Matplotlib</span><span class="folio">06</span></header>
+          <h2 class="title">축과 제목</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">읽는 사람에게 필요한 정보는 축 이름과 단위</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">fig, ax = plt.subplots(figsize=(<span class="no">6</span>, <span class="no">3</span>))
+ax.plot(t, temp)
+
+ax.set_title(<span class="s">"Temperature"</span>)
+ax.set_xlabel(<span class="s">"time [s]"</span>)
+ax.set_ylabel(<span class="s">"temp [C]"</span>)
+ax.set_xlim(<span class="no">0</span>, <span class="no">8</span>)
+ax.grid(<span class="k">True</span>, alpha=<span class="no">0.3</span>)</pre>
+              <div class="run-slot">
+                <ul class="ul">
+                  <li><strong>set_title</strong> — 그래프 제목. 슬라이드 제목과 겹치지 않게</li>
+                  <li><strong>set_xlabel</strong> — 단위는 대괄호로 병기</li>
+                  <li><strong>set_xlim</strong> — 표시 구간 제한</li>
+                  <li><strong>grid</strong> — 값을 읽어야 하는 그림에만 사용</li>
+                </ul>
+                <div data-run-out=""></div>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:29%"></i></div><span class="foot-num">06 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="07 범례와 여러 선" data-screen-label="07 범례와 여러 선">
+          <header class="head"><span class="kicker">Matplotlib</span><span class="folio">07</span></header>
+          <h2 class="title">범례와 여러 선</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">선이 둘 이상이면 label 과 legend 필수</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">fig, ax = plt.subplots(figsize=(<span class="no">6</span>, <span class="no">3</span>))
+
+ax.plot(t, temp, label=<span class="s">"temp"</span>)
+ax.plot(t, hum, label=<span class="s">"humidity"</span>)
+ax.legend(loc=<span class="s">"upper right"</span>)</pre>
+              <div class="run-slot">
+                <ul class="ul">
+                  <li><strong>label</strong> — 각 plot 에 이름 부여</li>
+                  <li><strong>legend</strong> — label 이 있는 것만 모아 표시</li>
+                  <li><strong>loc</strong> — "best", "upper left" 등으로 위치 지정</li>
+                  <li><strong>색 순환</strong> — 미지정 시 기본 색이 순서대로 배정</li>
+                </ul>
+                <div data-run-out=""></div>
+              </div>
+            </div>
+            <p class="note"><strong>단위가 다르면</strong> — 한 축에 겹치면 오해 유발. 트윈 축 또는 서브플롯 사용</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:33%"></i></div><span class="foot-num">07 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="08 연습문제 1" data-screen-label="08 연습문제 1">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">08</span></header>
+          <h2 class="title">연습문제 1</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">temp 와 hum 을 한 그래프에 그리고, 축 이름과 범례를 붙이시오. 앞쪽 100개 구간만 보이게 하시오.</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">fig, ax = plt.subplots(figsize=(<span class="no">6</span>, <span class="no">3</span>))
+
+<span class="err"># IMPLEMENT HERE</span></pre>
+              <div class="run-slot" style="min-height:420px"><div data-run-out=""></div></div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:38%"></i></div><span class="foot-num">08 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="09 산점도" data-screen-label="09 산점도">
+          <header class="head"><span class="kicker">Matplotlib</span><span class="folio">09</span></header>
+          <h2 class="title">산점도</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">두 변수의 관계 확인은 선이 아니라 점</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">fig, ax = plt.subplots(figsize=(<span class="no">6</span>, <span class="no">3</span>))
+
+sc = ax.scatter(temp, hum, c=t, s=<span class="no">12</span>,
+                cmap=<span class="s">"viridis"</span>, alpha=<span class="no">0.7</span>)
+fig.colorbar(sc, ax=ax, label=<span class="s">"time [s]"</span>)</pre>
+              <div class="run-slot">
+                <ul class="ul">
+                  <li><strong>s</strong> — 점 크기. 배열을 주면 점마다 다르게</li>
+                  <li><strong>c</strong> — 색. 값 배열을 주면 세 번째 변수를 표현</li>
+                  <li><strong>cmap</strong> — 색 지도. viridis 는 흑백 인쇄에도 안전</li>
+                  <li><strong>colorbar</strong> — 색이 뜻하는 값의 눈금</li>
+                </ul>
+                <div data-run-out=""></div>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:43%"></i></div><span class="foot-num">09 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="10 막대와 히스토그램" data-screen-label="10 막대와 히스토그램">
+          <header class="head"><span class="kicker">Matplotlib</span><span class="folio">10</span></header>
+          <h2 class="title">막대와 히스토그램</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">범주는 막대, 분포는 히스토그램</p>
+            <div class="cols">
+              <pre data-run="" class="code xs">fig, ax = plt.subplots(<span class="no">1</span>, <span class="no">2</span>, figsize=(<span class="no">7</span>, <span class="no">2.6</span>))
+
+ax[<span class="no">0</span>].bar(place, counts, color=<span class="s">"tab:orange"</span>)
+ax[<span class="no">1</span>].hist(err, bins=<span class="no">30</span>, color=<span class="s">"tab:blue"</span>)</pre>
+              <div class="run-slot">
+                <ul class="ul">
+                  <li><strong>bar</strong> — 범주별 값. 가로 막대는 barh</li>
+                  <li><strong>hist</strong> — 값을 구간으로 세어 분포 확인</li>
+                  <li><strong>bins</strong> — 구간 수. 과도하면 계단이 잘게 쪼개짐</li>
+                  <li><strong>density=True</strong> — 개수 대신 비율로 정규화</li>
+                </ul>
+                <div data-run-out=""></div>
+              </div>
+            </div>
+            <p class="note"><strong>고르는 기준</strong> — 항목 사이에 순서가 없으면 막대, 값의 퍼짐을 보려면 히스토그램.</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:48%"></i></div><span class="foot-num">10 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="11 연습문제 2" data-screen-label="11 연습문제 2">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">11</span></header>
+          <h2 class="title">연습문제 2</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">place 별 counts 를 막대로, err 의 분포를 히스토그램으로 그려 한 Figure 에 좌우로 배치하시오.</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">fig, ax = plt.subplots(figsize=(<span class="no">6</span>, <span class="no">3</span>))
+
+<span class="err"># IMPLEMENT HERE</span></pre>
+              <div class="run-slot" style="min-height:420px"><div data-run-out=""></div></div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:52%"></i></div><span class="foot-num">11 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="12 서브플롯" data-screen-label="12 서브플롯">
+          <header class="head"><span class="kicker">Matplotlib</span><span class="folio">12</span></header>
+          <h2 class="title">서브플롯</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">그림 한 장에 여러 그래프를 격자로 배치</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">fig, ax = plt.subplots(<span class="no">2</span>, <span class="no">2</span>, figsize=(<span class="no">7</span>, <span class="no">4</span>))
+
+ax[<span class="no">0</span>, <span class="no">0</span>].plot(t, temp)
+ax[<span class="no">0</span>, <span class="no">1</span>].hist(err, bins=<span class="no">20</span>)
+ax[<span class="no">1</span>, <span class="no">0</span>].scatter(temp, hum, s=<span class="no">6</span>)
+ax[<span class="no">1</span>, <span class="no">1</span>].bar(place, counts)
+fig.tight_layout()</pre>
+              <div class="run-slot">
+                <ul class="ul">
+                  <li><strong>subplots(2, 2)</strong> — ax 는 2차원 배열</li>
+                  <li><strong>인덱싱</strong> — ax[행, 열] 로 각 칸 선택</li>
+                  <li><strong>1행이면</strong> — ax 는 1차원. ax[0], ax[1]</li>
+                  <li><strong>tight_layout</strong> — 라벨이 겹치지 않게 간격 조정</li>
+                </ul>
+                <div data-run-out=""></div>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:57%"></i></div><span class="foot-num">12 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="13 축 공유와 트윈 축" data-screen-label="13 축 공유와 트윈 축">
+          <header class="head"><span class="kicker">Matplotlib</span><span class="folio">13</span></header>
+          <h2 class="title">축 공유와 트윈 축</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">시간축 공유, 또는 단위가 다른 값의 중첩 표시</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">fig, ax = plt.subplots(figsize=(<span class="no">6</span>, <span class="no">3</span>))
+
+ax.plot(t, temp, color=<span class="s">"tab:red"</span>)
+ax.set_ylabel(<span class="s">"temp [C]"</span>)
+
+ax2 = ax.twinx()
+ax2.plot(t, hum, color=<span class="s">"tab:blue"</span>)
+ax2.set_ylabel(<span class="s">"humidity [%]"</span>)</pre>
+              <div class="run-slot">
+                <ul class="ul">
+                  <li><strong>twinx</strong> — x 공유, y 축 하나 추가</li>
+                  <li><strong>색 맞추기</strong> — 축 라벨 색을 선 색과 일치시켜 가독성 확보</li>
+                  <li><strong>주의</strong> — 두 y축은 오해를 부르기 쉬우니 꼭 필요할 때만</li>
+                </ul>
+                <div data-run-out=""></div>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:62%"></i></div><span class="foot-num">13 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="14 채우기와 오차 표시" data-screen-label="14 채우기와 오차 표시">
+          <header class="head"><span class="kicker">Matplotlib</span><span class="folio">14</span></header>
+          <h2 class="title">채우기와 오차 표시</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">값 하나가 아니라 범위를 보여야 하는 경우</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">m = temp.reshape(<span class="no">20</span>, <span class="no">20</span>).mean(axis=<span class="no">1</span>)
+s = temp.reshape(<span class="no">20</span>, <span class="no">20</span>).std(axis=<span class="no">1</span>)
+x = np.arange(m.size)
+
+fig, ax = plt.subplots(figsize=(<span class="no">6</span>, <span class="no">3</span>))
+ax.plot(x, m)
+ax.fill_between(x, m - s, m + s, alpha=<span class="no">0.3</span>)</pre>
+              <div class="run-slot">
+                <ul class="ul">
+                  <li><strong>fill_between</strong> — 위아래 경계 사이를 채움</li>
+                  <li><strong>errorbar</strong> — 점마다 오차 막대 표시</li>
+                  <li><strong>alpha</strong> — 밴드는 옅게, 평균선은 진하게</li>
+                  <li><strong>의미</strong> — 표준편차인지 신뢰구간인지 캡션에 명시</li>
+                </ul>
+                <div data-run-out=""></div>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:67%"></i></div><span class="foot-num">14 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="15 이미지와 컬러맵" data-screen-label="15 이미지와 컬러맵">
+          <header class="head"><span class="kicker">Matplotlib</span><span class="folio">15</span></header>
+          <h2 class="title">이미지와 컬러맵</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">사진도 배열, imshow 로 그대로 표시</p>
+            <div class="cols">
+              <pre data-run="" class="code xs"><span class="k">from</span> matplotlib <span class="k">import</span> cbook
+
+p = cbook.get_sample_data(<span class="s">"grace_hopper.jpg"</span>)
+img = plt.imread(p)
+<span class="fn">print</span>(img.shape, img.dtype)
+
+fig, ax = plt.subplots(<span class="no">1</span>, <span class="no">2</span>, figsize=(<span class="no">7</span>, <span class="no">3</span>))
+ax[<span class="no">0</span>].imshow(img)
+gray = img.mean(axis=<span class="no">2</span>)
+im = ax[<span class="no">1</span>].imshow(gray, cmap=<span class="s">"magma"</span>)
+fig.colorbar(im, ax=ax[<span class="no">1</span>])</pre>
+              <div class="run-slot">
+                <ul class="ul">
+                  <li><strong>imshow</strong> — (H, W, 3) 은 RGB 그대로, 2차원은 cmap 으로 채색</li>
+                  <li><strong>값 범위</strong> — uint8 은 0~255, float 는 0~1 로 해석</li>
+                  <li><strong>cmap</strong> — 2차원에만 적용. 크기 데이터 viridis, 발산 데이터 coolwarm</li>
+                  <li><strong>vmin, vmax</strong> — 색 범위 고정. 여러 장 비교 시 필수</li>
+                  <li><strong>origin</strong> — 사진은 "upper" 기본, 좌표 격자는 "lower"</li>
+                </ul>
+                <div data-run-out=""></div>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:71%"></i></div><span class="foot-num">15 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="16 연습문제 3" data-screen-label="16 연습문제 3">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">16</span></header>
+          <h2 class="title">연습문제 3</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">2x2 서브플롯에 시간에 따른 temp, err 히스토그램, temp-hum 산점도, grid 이미지를 각각 그리시오.</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">fig, ax = plt.subplots(figsize=(<span class="no">6</span>, <span class="no">3</span>))
+
+<span class="err"># IMPLEMENT HERE</span></pre>
+              <div class="run-slot" style="min-height:420px"><div data-run-out=""></div></div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:76%"></i></div><span class="foot-num">16 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="17 스타일과 폰트" data-screen-label="17 스타일과 폰트">
+          <header class="head"><span class="kicker">Matplotlib</span><span class="folio">17</span></header>
+          <h2 class="title">스타일과 폰트</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">기본값 변경은 rcParams 한 곳에서</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">plt.rcParams[<span class="s">"figure.dpi"</span>] = <span class="no">120</span>
+plt.rcParams[<span class="s">"axes.grid"</span>] = <span class="k">True</span>
+plt.rcParams[<span class="s">"font.size"</span>] = <span class="no">11</span>
+plt.rcParams[<span class="s">"axes.unicode_minus"</span>] = <span class="k">False</span>
+
+fig, ax = plt.subplots(figsize=(<span class="no">6</span>, <span class="no">2.6</span>))
+ax.plot(t, temp)</pre>
+              <div class="run-slot">
+                <ul class="ul">
+                  <li><strong>rcParams</strong> — 전역 기본값. 스크립트 상단에 배치</li>
+                  <li><strong>style.use</strong> — "ggplot", "seaborn-v0_8" 등 묶음 적용</li>
+                  <li><strong>한글</strong> — font.family 에 설치된 한글 폰트 이름 지정</li>
+                  <li><strong>unicode_minus</strong> — False 지정 시 음수 기호 깨짐 방지</li>
+                </ul>
+                <div data-run-out=""></div>
+              </div>
+            </div>
+            <p class="note"><strong>브라우저 실행</strong> — 슬라이드 런타임에는 한글 폰트 없음. 그림 안 글자는 영문 사용</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:81%"></i></div><span class="foot-num">17 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="18 저장하기" data-screen-label="18 저장하기">
+          <header class="head"><span class="kicker">Matplotlib</span><span class="folio">18</span></header>
+          <h2 class="title">저장하기</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">보고서용 그림은 파일로 저장</p>
+            <div class="cols">
+              <pre data-run="" class="code xs">fig, ax = plt.subplots(figsize=(<span class="no">6</span>, <span class="no">3</span>))
+ax.plot(t, temp)
+
+fig.savefig(<span class="s">"out.png"</span>, dpi=<span class="no">200</span>,
+            bbox_inches=<span class="s">"tight"</span>)
+fig.savefig(<span class="s">"out.pdf"</span>)
+
+<span class="k">import</span> os
+os.path.getsize(<span class="s">"out.png"</span>)
+os.path.getsize(<span class="s">"out.pdf"</span>)</pre>
+              <div class="run-slot">
+                <ul class="ul">
+                  <li><strong>dpi</strong> — 래스터 해상도. 인쇄물은 200 이상</li>
+                  <li><strong>bbox_inches</strong> — "tight" 로 여백 제거</li>
+                  <li><strong>png</strong> — 화면과 문서용. 픽셀 고정</li>
+                  <li><strong>pdf, svg</strong> — 벡터. 확대해도 품질 유지</li>
+                </ul>
+                <div data-run-out=""></div>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:86%"></i></div><span class="foot-num">18 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="19 자주 하는 실수" data-screen-label="19 자주 하는 실수">
+          <header class="head"><span class="kicker">Matplotlib</span><span class="folio">19</span></header>
+          <h2 class="title">자주 하는 실수</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <div class="card warn">
+                <h3 class="card-h coral">흔한 실수</h3>
+                <ul class="ul coral">
+                  <li><strong>plt 와 ax 혼용</strong> — 대상 그림 추적 불가</li>
+                  <li><strong>figure 누수</strong> — 반복문에서 close 누락 시 메모리 누적</li>
+                  <li><strong>축 범위 방치</strong> — 그림마다 스케일이 달라 비교 불가</li>
+                  <li><strong>show 남발</strong> — 스크립트에서는 마지막 한 번으로 충분</li>
+                </ul>
+              </div>
+              <div class="card good">
+                <h3 class="card-h leaf">권장 방식</h3>
+                <ul class="ul leaf">
+                  <li><strong>fig, ax 로 시작</strong> — 그리는 대상 항상 명시</li>
+                  <li><strong>plt.close(fig)</strong> — 저장 후 닫기</li>
+                  <li><strong>set_ylim 고정</strong> — 비교할 그림은 같은 범위로</li>
+                  <li><strong>savefig 우선</strong> — 자동화에서는 show 대신 저장</li>
+                </ul>
+              </div>
+            </div>
+            <p class="note"><strong>기억할 하나</strong> — 그림은 결과가 아니라 코드. 같은 코드에서 같은 그림 재현이 기준</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:90%"></i></div><span class="foot-num">19 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="20 연습문제 4" data-screen-label="20 연습문제 4">
+          <header class="head"><span class="kicker">Practice</span><span class="folio">20</span></header>
+          <h2 class="title">연습문제 4</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">위에 temp 와 hum 을 시간축 공유로, 아래에 err 히스토그램을 놓은 2단 그림을 만들고 dashboard.png 로 저장하시오.</p>
+            <div class="cols">
+              <pre data-run="" class="code tight">fig, ax = plt.subplots(figsize=(<span class="no">6</span>, <span class="no">3</span>))
+
+<span class="err"># IMPLEMENT HERE</span></pre>
+              <div class="run-slot" style="min-height:420px"><div data-run-out=""></div></div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:95%"></i></div><span class="foot-num">20 / 21</span></footer>
+        </section>
+
+        <section class="slide" data-label="21 정리" data-screen-label="21 정리">
+          <header class="head"><span class="kicker">Wrap Up</span><span class="folio">21</span></header>
+          <h2 class="title">정리</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols3">
+              <div class="card soft" style="padding:22px 26px">
+                <h3 class="card-h sky">구조</h3>
+                <ul class="ul">
+                  <li><strong>Figure</strong> — 종이 한 장, 저장 단위</li>
+                  <li><strong>Axes</strong> — 그래프 한 칸, 그리는 주체</li>
+                  <li><strong>방식</strong> — fig, ax 객체를 지정해 그리기</li>
+                </ul>
+              </div>
+              <div class="card" style="padding:22px 26px">
+                <h3 class="card-h">종류</h3>
+                <ul class="ul">
+                  <li><strong>추세</strong> — plot</li>
+                  <li><strong>관계</strong> — scatter</li>
+                  <li><strong>범주와 분포</strong> — bar, hist</li>
+                  <li><strong>2차원 값</strong> — imshow</li>
+                </ul>
+              </div>
+              <div class="card good" style="padding:22px 26px">
+                <h3 class="card-h leaf">마무리</h3>
+                <ul class="ul leaf">
+                  <li><strong>배치</strong> — subplots 와 tight_layout</li>
+                  <li><strong>설명</strong> — 축 이름, 단위, 범례</li>
+                  <li><strong>저장</strong> — savefig, dpi, bbox_inches</li>
+                </ul>
+              </div>
+            </div>
+            
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-1 Matplotlib</span><div class="bar"><i style="width:100%"></i></div><span class="foot-num">21 / 21</span></footer>
+        </section>
+</deck-stage>
+
+
+
+</body></html>

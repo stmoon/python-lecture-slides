@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>파이썬 데이터 분석 기초 - 강의 슬라이드</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%231d4ed8%27/%3E%3Ctext x=%2716%27 y=%2723%27 font-size=%2720%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27sans-serif%27 font-weight=%27bold%27%3EP%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Atkinson+Hyperlegible:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sky: #3b82f6; --sky-deep: #1d4ed8; --sky-soft: #dbeafe;
+  --leaf-deep: #16a34a; --leaf-soft: #dcfce7;
+  --ink: #0f172a; --ink-muted: #475569; --ink-subtle: #94a3b8;
+  --outline: #e2e8f0; --surface: #f8fafc;
+  --font-display: 'Nunito', 'Noto Sans KR', sans-serif;
+  --font-body: 'Atkinson Hyperlegible', 'Noto Sans KR', sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: #fff; color: var(--ink);
+  font-family: var(--font-body); line-height: 1.6;
+}
+.wrap { max-width: 960px; margin: 0 auto; padding: 72px 24px 96px; }
+.kicker { font-family: var(--font-display); font-weight: 700; color: var(--sky); letter-spacing: 0.06em; font-size: 15px; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(34px, 6vw, 52px); line-height: 1.15; margin: 14px 0 0; letter-spacing: -0.02em; }
+.rule { width: 72px; height: 7px; border-radius: 999px; background: var(--sky); margin: 22px 0 0; }
+.sub { color: var(--ink-muted); font-size: 18px; margin: 22px 0 0; }
+h2 { font-family: var(--font-display); font-weight: 700; font-size: 22px; margin: 56px 0 18px; }
+.deck-list { display: grid; gap: 16px; }
+.deck {
+  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  border: 1px solid var(--outline); border-radius: 18px;
+  background: var(--surface); padding: 22px 26px;
+}
+.deck-no {
+  font-family: var(--font-display); font-weight: 800; font-size: 15px;
+  color: var(--sky-deep); background: var(--sky-soft);
+  border-radius: 999px; padding: 6px 14px; white-space: nowrap;
+}
+.deck-main { flex: 1 1 320px; min-width: 0; }
+.deck-title { font-family: var(--font-display); font-weight: 700; font-size: 21px; margin: 0; }
+.deck-meta { color: var(--ink-muted); font-size: 15px; margin: 6px 0 0; }
+.deck-links { display: flex; gap: 10px; }
+a.btn {
+  font-family: var(--font-display); font-weight: 700; font-size: 15px;
+  text-decoration: none; border-radius: 999px; padding: 10px 20px; white-space: nowrap;
+  color: #fff; background: var(--sky-deep); border: 2px solid var(--sky-deep);
+}
+a.btn.ghost { color: var(--sky-deep); background: #fff; }
+a.btn:hover { background: var(--sky); border-color: var(--sky); color: #fff; }
+.tips { border: 1px solid var(--outline); border-left: 5px solid var(--leaf-deep); border-radius: 14px; background: var(--leaf-soft); padding: 20px 26px; }
+.tips ul { margin: 0; padding-left: 20px; }
+.tips li { margin: 8px 0; }
+kbd {
+  font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 0.86em;
+  background: #fff; border: 1px solid var(--outline); border-bottom-width: 2px;
+  border-radius: 6px; padding: 2px 7px;
+}
+footer { margin-top: 64px; color: var(--ink-subtle); font-size: 14px; border-top: 1px solid var(--outline); padding-top: 20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="kicker">LECTURE SLIDES</p>
+  <h1>파이썬 데이터 분석 기초</h1>
+  <div class="rule"></div>
+  <p class="sub">모듈과 패키지, 그리고 Matplotlib · NumPy · Pandas. 슬라이드의 코드는 브라우저에서 바로 실행된다.</p>
+
+  <h2>강의 슬라이드</h2>
+  <div class="deck-list">
+    <div class="deck">
+      <span class="deck-no">Part 1-1</span>
+      <div class="deck-main">
+        <p class="deck-title">모듈과 패키지</p>
+        <p class="deck-meta">모듈, 패키지, 라이브러리의 구분과 import 규칙 · 1시간</p>
+      </div>
+      <div class="deck-links">
+        <a class="btn" href="./part1-1-module-concept/">열기</a>
+        <a class="btn ghost" href="./part1-1-module-concept/slides.pdf">PDF</a>
+      </div>
+    </div>
+    <div class="deck">
+      <span class="deck-no">Part 1-2</span>
+      <div class="deck-main">
+        <p class="deck-title">모듈과 패키지 만들기</p>
+        <p class="deck-meta">패키지 구조, __init__, 공개 API, 진입점 · 1시간</p>
+      </div>
+      <div class="deck-links">
+        <a class="btn" href="./part1-2-module-build/">열기</a>
+        <a class="btn ghost" href="./part1-2-module-build/slides.pdf">PDF</a>
+      </div>
+    </div>
+    <div class="deck">
+      <span class="deck-no">Part 2-1</span>
+      <div class="deck-main">
+        <p class="deck-title">Matplotlib</p>
+        <p class="deck-meta">Figure 와 Axes, 그래프 종류, 서브플롯, 저장 · 1시간</p>
+      </div>
+      <div class="deck-links">
+        <a class="btn" href="./part2-1-matplotlib/">열기</a>
+        <a class="btn ghost" href="./part2-1-matplotlib/slides.pdf">PDF</a>
+      </div>
+    </div>
+    <div class="deck">
+      <span class="deck-no">Part 2-2</span>
+      <div class="deck-main">
+        <p class="deck-title">NumPy</p>
+        <p class="deck-meta">다차원 배열, 인덱싱, 브로드캐스팅, 선형대수 · 1.5시간</p>
+      </div>
+      <div class="deck-links">
+        <a class="btn" href="./part2-2-numpy/">열기</a>
+        <a class="btn ghost" href="./part2-2-numpy/slides.pdf">PDF</a>
+      </div>
+    </div>
+    <div class="deck">
+      <span class="deck-no">Part 2-3</span>
+      <div class="deck-main">
+        <p class="deck-title">Pandas</p>
+        <p class="deck-meta">Series 와 DataFrame, 전처리, 그룹 집계, 시계열 · 1.5시간</p>
+      </div>
+      <div class="deck-links">
+        <a class="btn" href="./part2-3-pandas/">열기</a>
+        <a class="btn ghost" href="./part2-3-pandas/slides.pdf">PDF</a>
+      </div>
+    </div>
+  </div>
+
+  <h2>보는 방법</h2>
+  <div class="tips">
+    <ul>
+      <li><b>발표 모드</b> — 오른쪽 아래 "전체 화면" 버튼 또는 <kbd>F</kbd>. 다음 장은 <kbd>Space</kbd> 또는 방향키, 종료는 <kbd>Esc</kbd></li>
+      <li><b>코드 실행</b> — 코드 블록의 "실행" 버튼 또는 <kbd>Ctrl</kbd>+<kbd>Enter</kbd>. 코드는 직접 고쳐서 다시 실행 가능</li>
+      <li><b>주석 토글</b> — 선택한 줄에 <kbd>Ctrl</kbd>+<kbd>/</kbd>. 결과 창은 <kbd>Esc</kbd> 로 닫음</li>
+      <li><b>첫 실행</b> — 파이썬 런타임을 내려받느라 20초 안팎 소요. 이후는 즉시 실행. 인터넷 연결 필요</li>
+      <li><b>권장 브라우저</b> — Chrome, Edge 등 최신 브라우저</li>
+    </ul>
+  </div>
+
+  <footer>강의 슬라이드 전용 페이지. 실습 자료와 답안은 포함하지 않는다.</footer>
+</div>
+</body></html>

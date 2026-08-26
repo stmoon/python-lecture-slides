@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Part 1-1 모듈과 패키지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;family=Atkinson+Hyperlegible:wght@400;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Noto+Sans+KR:wght@400;500;700;900&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./deck.css">
+<script defer="" src="./deck.js"></script>
+<script type="text/x-deck-preamble">
+from pathlib import Path
+
+Path("calc.py").write_text("""PI = 3.14159
+
+
+def add(a, b):
+    return a + b
+
+
+def circle_area(r):
+    return PI * r * r
+
+
+def main():
+    print(add(1, 2))
+
+
+if __name__ == "__main__":
+    main()
+""")
+
+Path("log.csv").write_text("t,temp\n0.0,21.5\n0.1,21.6\n0.2,21.4\n")
+
+pkg = Path("sensorkit")
+(pkg / "filters").mkdir(parents=True, exist_ok=True)
+(pkg / "io.py").write_text("""import csv
+
+
+def load_csv(path):
+    with open(path) as f:
+        return list(csv.DictReader(f))
+""")
+(pkg / "filters" / "moving_average.py").write_text("""def moving_average(xs, n=3):
+    return [sum(xs[i:i + n]) / n for i in range(len(xs) - n + 1)]
+""")
+(pkg / "filters" / "__init__.py").write_text("from .moving_average import moving_average\n")
+(pkg / "__init__.py").write_text("""from .io import load_csv
+from .filters import moving_average
+
+__all__ = ["load_csv", "moving_average"]
+__version__ = "0.1.0"
+""")
+
+import sys
+if "" not in sys.path:
+    sys.path.insert(0, "")
+import calc
+</script>
+<style>
+@page { size: 1920px 1080px; margin: 0; }
+html, body { margin: 0; padding: 0; background: #fff; }
+:root { color-scheme: light; }
+deck-stage { display: block; }
+.slide {
+  width: 1920px; height: 1080px; overflow: hidden; box-sizing: border-box;
+  break-after: page; page-break-after: always;
+}
+.slide:last-child { break-after: auto; page-break-after: auto; }
+</style>
+<link rel="stylesheet" href="cde-layout.css"></head>
+<body>
+<deck-stage>
+        <section class="slide cover" data-label="Cover" data-screen-label="Cover">
+          <span class="course">Python Programming</span>
+          <span class="kicker">Part 1-1 · Basic Concept</span>
+          <h1 class="display">모듈과 패키지</h1>
+          <div class="sun-rule"></div>
+          <p class="presenter">충북대학교 지능로봇공학과 문성태 교수</p>
+        </section>
+
+        <section class="slide" data-label="01 Contents" data-screen-label="01 Contents">
+          <header class="head"><span class="kicker">Contents</span><span class="folio">01</span></header>
+          <h2 class="title">목차</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="text" style="--cde-cols: 1;"><div class="cde-text"><div class="grid4">
+              <div class="card soft">
+                <h3 class="card-h sky">모듈 · 02-12</h3>
+                <ul class="ul">
+                  <li><strong>구분</strong> — 모듈, 패키지, 라이브러리</li>
+                  <li><strong>import</strong> — 형태별 차이, 별표 금지</li>
+                  <li><strong>동작</strong> — 탐색 경로, 캐시, 진입점</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3 class="card-h">패키지 · 13-17</h3>
+                <ul class="ul">
+                  <li><strong>구조</strong> — 디렉터리로 모듈 묶기</li>
+                  <li><strong>__init__.py</strong> — 공개 이름 정하기</li>
+                  <li><strong>경로</strong> — 절대 import 기본, 상대 import 함정</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3 class="card-h">환경 · 18-20</h3>
+                <ul class="ul">
+                  <li><strong>표준 라이브러리</strong> — 설치 없이 쓰는 범위</li>
+                  <li><strong>pip</strong> — PyPI 에서 외부 패키지 설치</li>
+                  <li><strong>가상환경</strong> — 프로젝트별 의존성 격리</li>
+                </ul>
+              </div>
+              <div class="card good">
+                <h3 class="card-h leaf">정리 · 21-22</h3>
+                <ul class="ul leaf">
+                  <li><strong>용어</strong> — 모듈, 패키지, 라이브러리 구분</li>
+                  <li><strong>핵심</strong> — 실무에서 지킬 규칙 다섯</li>
+                  <li><strong>다음</strong> — Part 1-2 패키지 만들기</li>
+                </ul>
+              </div>
+            </div></div><div class="cde-media" style="--cde-cols: 1;"></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:5%"></i></div><span class="foot-num">01 / 22</span></footer>
+        </section>
+        <section class="slide" data-label="02 Three Terms" data-screen-label="02 Three Terms">
+          <header class="head"><span class="kicker">Overview</span><span class="folio">02</span></header>
+          <h2 class="title">모듈, 패키지, 라이브러리</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="right" style="--cde-cols: 1;"><div class="cde-text"><p class="lead">크기가 다른 같은 계열의 세 단위</p><ul class="ul">
+                <li><strong>모듈</strong> — 함수, 클래스, 변수를 담은 .py 파일 하나</li>
+                <li><strong>패키지</strong> — 모듈을 담은 디렉터리, 이름에 계층이 생김</li>
+                <li><strong>라이브러리</strong> — 설치와 배포의 단위, 여러 패키지의 묶음</li>
+                <li><strong>포함 관계</strong> — 모듈 &lt; 패키지 &lt; 라이브러리</li>
+                <li><strong>쓰는 법</strong> — 셋 다 import 한 줄로 같음</li>
+              </ul><p class="note"><strong>경계는 느슨함</strong>&nbsp;</p><div>NumPy 는 라이브러리이자 최상위 패키지, math 는 모듈 하나로 끝</div><p></p></div><div class="cde-media" style="--cde-cols: 1;"><figure class="fig plain">
+                <img src="./imgs/module-package-library.svg" alt="module inside package inside library">
+              </figure></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:9%"></i></div><span class="foot-num">02 / 22</span></footer>
+        </section>
+        <section class="slide" data-label="03 Why Split" data-screen-label="03 Why Split">
+          <header class="head"><span class="kicker">Module</span><span class="folio">03</span></header>
+          <h2 class="title">왜 필요한가</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols"><div class="card warn">
+                <h3 class="card-h coral">한 파일에 전부</h3>
+                <ul class="ul coral">
+                  <li><strong>탐색 비용</strong> — 3000줄에서 함수 하나 찾기</li>
+                  <li><strong>이름 충돌</strong> — 같은 이름이 서로를 덮음</li>
+                  <li><strong>영향 범위 불명</strong> — 한 줄 수정에 어디가 깨질지 모름</li>
+                  <li><strong>테스트 불가</strong> — 일부만 떼어낼 수 없음</li>
+                  <li><strong>협업 충돌</strong> — 두 사람 동시 수정 불가</li>
+                </ul>
+              </div><div class="card good">
+                <h3 class="card-h leaf">파일로 나눔</h3>
+                <ul class="ul leaf">
+                  <li><strong>재사용</strong> — 다른 프로젝트에 그대로</li>
+                  <li><strong>이름 공간 분리</strong> — 파일마다 독립</li>
+                  <li><strong>변경 국소화</strong> — 범위가 파일 하나</li>
+                  <li><strong>단위 테스트</strong> — 기능 단위 검증</li>
+                  <li><strong>병렬 작업</strong> — 파일별 분담</li>
+                </ul>
+              </div></div>
+            </div>
+            <p class="note"><strong>나누는 단위 = 모듈</strong> — 문법이 아니라 파일과 디렉터리로 표현</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:14%"></i></div><span class="foot-num">03 / 22</span></footer>
+        </section>
+
+        <section class="slide" data-label="04 Module" data-screen-label="04 Module">
+          <header class="head"><span class="kicker">Module</span><span class="folio">04</span></header>
+          <h2 class="title">모듈</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="right" style="--cde-cols: 1;"><div class="cde-text"><p class="lead">확장자가 <strong>.py</strong> 인 파일 하나 = 모듈 하나</p><ul class="ul">
+                <li><strong>모듈 이름</strong> — 확장자를 뗀 파일 이름</li>
+                <li><strong>담는 것</strong> — 함수, 클래스, 상수</li>
+                <li><strong>표준 라이브러리</strong> — 전부 모듈</li>
+                <li><strong>선언 불필요</strong> — 등록 절차 없음</li>
+              </ul><p class="note"><strong>파일 이름 = 이름 공간</strong> — 이름 짓기가 설계의 시작</p></div><div class="cde-media" style="--cde-cols: 1;"><pre class="code">calc.py       <span class="c">모듈 이름: calc
+</span>report.py     <span class="c">모듈 이름: report
+</span>sensor_io.py  <span class="c">모듈 이름: sensor_io
+</span>json.py       <span class="c">모듈 이름: json</span></pre></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:18%"></i></div><span class="foot-num">04 / 22</span></footer>
+        </section>
+
+        <section class="slide" data-label="05 Module Kinds" data-screen-label="05 Module Kinds">
+          <header class="head"><span class="kicker">Module</span><span class="folio">05</span></header>
+          <h2 class="title">모듈의 종류</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="bottom" style="--cde-cols: 1;"><div class="cde-text"><p class="lead">출처는 셋, 쓰는 법은 하나</p><div class="cols3">
+              <div class="card soft">
+                <h3 class="card-h sky">내장 모듈</h3>
+                <ul class="ul">
+                  <li><strong>출처</strong> — 파이썬 설치에 포함</li>
+                  <li><strong>설치</strong> — 불필요, 바로 import</li>
+                  <li><strong>예</strong> — math, random, os, time</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3 class="card-h">외부 모듈</h3>
+                <ul class="ul">
+                  <li><strong>출처</strong> — PyPI 에 공개된 남의 코드</li>
+                  <li><strong>설치</strong> — pip install 필요</li>
+                  <li><strong>예</strong> — numpy, pandas, requests</li>
+                </ul>
+              </div>
+              <div class="card good">
+                <h3 class="card-h leaf">사용자 모듈</h3>
+                <ul class="ul leaf">
+                  <li><strong>출처</strong> — 내가 만든 프로젝트 파일</li>
+                  <li><strong>설치</strong> — 만들면 끝</li>
+                  <li><strong>예</strong> — calc.py, sensor_io.py</li>
+                </ul>
+              </div>
+            </div></div><div class="cde-media" style="--cde-cols: 1;"><pre data-run="" class="code"><span class="k">import</span> math          <span class="c"># 내장, 설치 없이
+</span><span class="k">import</span> numpy <span class="k">as</span> np   <span class="c"># 외부, pip install numpy 뒤에
+</span><span class="k">import</span> calc          <span class="c"># 사용자, 같은 폴더의 calc.py</span></pre></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:23%"></i></div><span class="foot-num">05 / 22</span></footer>
+        </section>
+        <section class="slide" data-label="06 First Module" data-screen-label="06 First Module">
+          <header class="head"><span class="kicker">Module</span><span class="folio">06</span></header>
+          <h2 class="title">첫 모듈</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="bottom" style="--cde-cols: 2;"><div class="cde-text"><p class="note"><strong>같은 디렉터리</strong> — 설정 없이 바로 import</p><p class="note"><strong>점 표기</strong> — 모듈 이름 뒤에 점을 찍어 내부 이름 접근</p></div><div class="cde-media" style="--cde-cols: 2;"><pre data-run="" class="code"><span class="c"># calc.py
+</span>PI = <span class="no">3.14159
+
+</span><span class="k">def </span><span class="fn">add</span>(a, b):
+    <span class="k">return</span> a + b
+
+<span class="k">def </span><span class="fn">circle_area</span>(r):
+    <span class="k">return</span> PI * r * r</pre><pre data-run="" class="code"><span class="c"># main.py
+</span><span class="k">import</span> calc
+
+<span class="fn">print</span>(calc.add(<span class="no">1</span>, <span class="no">2</span>))
+<span class="c"># 3
+</span><span class="fn">print</span>(calc.circle_area(<span class="no">2</span>))
+<span class="c"># 12.56636
+</span><span class="fn">print</span>(calc.PI)
+<span class="c"># 3.14159</span></pre></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:27%"></i></div><span class="foot-num">06 / 22</span></footer>
+        </section>
+
+        <section class="slide" data-label="07 Import Forms" data-screen-label="07 Import Forms">
+          <header class="head"><span class="kicker">Module</span><span class="folio">07</span></header>
+          <h2 class="title">import</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="text" style="--cde-cols: 1;"><div class="cde-text"><div class="grid4">
+              <div class="card">
+                <h3 class="card-h sky">import calc</h3>
+                <p class="note"><strong>기본형</strong> — 항상 calc.add(1, 2). 출처 노출, 이름 충돌 없음</p>
+              </div>
+              <div class="card">
+                <h3 class="card-h sky">import numpy as np</h3>
+                <p class="note"><strong>별칭</strong> — 긴 이름 축약. 관례 별칭만 (np, pd, plt)</p>
+              </div>
+              <div class="card">
+                <h3 class="card-h sky">from calc import add</h3>
+                <p class="note"><strong>직접 반입</strong> — add(1, 2). 짧지만 출처 불명</p>
+              </div>
+              <div class="card warn">
+                <h3 class="card-h coral">from calc import *</h3>
+                <p class="note"><strong>금지</strong> — 모든 공개 이름 반입. 다음 장에서 이유</p>
+              </div>
+            </div></div><div class="cde-media" style="--cde-cols: 1;"></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:32%"></i></div><span class="foot-num">07 / 22</span></footer>
+        </section>
+
+        <section class="slide" data-label="08 Star Import" data-screen-label="08 Star Import">
+          <header class="head"><span class="kicker">Module</span><span class="folio">08</span></header>
+          <h2 class="title">from import *</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols">
+              <pre data-run class="code on-soft xs"><span class="k">from</span> math <span class="k">import</span> *
+<span class="k">from</span> numpy <span class="k">import</span> *
+
+sqrt(-<span class="no">1</span>)
+<span class="c"># numpy 의 sqrt 가 승리: nan</span></pre>
+              <pre data-run class="code on-soft xs"><span class="k">import</span> math
+<span class="k">import</span> numpy <span class="k">as</span> np
+
+np.sqrt(-<span class="no">1</span>)    <span class="c"># nan</span>
+math.sqrt(-<span class="no">1</span>)  <span class="c"># ValueError</span></pre>
+            </div>
+            <div class="cols">
+              <div class="card warn" style="padding:22px 26px">
+                <h3 class="card-h coral">별표가 남기는 문제</h3>
+                <ul class="ul coral" style="gap:16px">
+                  <li><strong>이름 충돌</strong> — 나중에 온 이름이 앞의 것을 덮음</li>
+                  <li><strong>출처 불명</strong> — sqrt 가 어느 모듈 것인지 코드만으로 판별 불가</li>
+                  <li><strong>도구 무력화</strong> — 자동완성과 정적 분석이 막힘</li>
+                </ul>
+              </div>
+              <div class="card good" style="padding:22px 26px">
+                <h3 class="card-h leaf">__all__ 이 필요한 이유</h3>
+                <ul class="ul leaf" style="gap:16px">
+                  <li><strong>범위 한정</strong> — 별표가 가져갈 이름을 목록으로 고정</li>
+                  <li><strong>유출 차단</strong> — 목록이 없으면 그 모듈이 import 한 이름까지 유출</li>
+                  <li><strong>변경 자유</strong> — 목록 밖 이름은 내부 구현, 자유롭게 변경</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:36%"></i></div><span class="foot-num">08 / 22</span></footer>
+        </section>
+
+        <section class="slide" data-label="09 Search Path" data-screen-label="09 Search Path">
+          <header class="head"><span class="kicker">Module</span><span class="folio">09</span></header>
+          <h2 class="title">탐색 경로</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="right" style="--cde-cols: 1;"><div class="cde-text"><p class="lead">import 한 줄 실행 시 파이썬이 훑는 순서</p><ol class="steps">
+                <li>실행 중인 스크립트 디렉터리</li>
+                <li>환경변수 PYTHONPATH 경로</li>
+                <li>표준 라이브러리 디렉터리</li>
+                <li>site-packages, pip 설치본</li>
+              </ol><h3 class="card-h coral">가장 흔한 사고</h3><p class="note"><strong>가림</strong> — 현재 디렉터리가 1순위. 표준 라이브러리와 같은 파일명 금지</p></div><div class="cde-media" style="--cde-cols: 1;"><pre class="code on-soft tight"><span class="c"># 내 파일: random.py
+</span><span class="k">import</span> random
+random.randint(<span class="no">1</span>, <span class="no">6</span>)
+<span class="err"># AttributeError</span></pre></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:41%"></i></div><span class="foot-num">09 / 22</span></footer>
+        </section>
+
+        <section class="slide" data-label="10 Module Cache" data-screen-label="10 Module Cache">
+          <header class="head"><span class="kicker">Module</span><span class="folio">10</span></header>
+          <h2 class="title">모듈 캐시</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="right" style="--cde-cols: 1;"><div class="cde-text"><ul class="ul">
+                <li><strong>1회 실행</strong> — import 를 몇 번 써도 본문은 한 번</li>
+                <li><strong>보관 위치</strong> — sys.modules 딕셔너리</li>
+                <li><strong>효과</strong> — 순환 참조와 중복 초기화 방지</li>
+                <li><strong>주의</strong> — 최상단 무거운 작업은 첫 import 지연</li>
+              </ul><p class="note"><strong>노트북 수정 미반영</strong> — 캐시 탓. reload 또는 커널 재시작</p></div><div class="cde-media" style="--cde-cols: 1;"><pre data-run="" class="code tight"><span class="k">import</span> sys
+
+<span class="k">import</span> calc  <span class="c"># 본문 1회 실행
+</span><span class="k">import</span> calc  <span class="c"># 캐시에서 반환
+
+</span><span class="fn">print</span>(<span class="s">"calc" </span><span class="k">in </span>sys.modules)
+<span class="c"># True</span></pre><pre data-run="" class="code tight"><span class="k">import</span> importlib
+importlib.reload(calc)  <span class="c"># 수정본 재적재</span></pre></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:45%"></i></div><span class="foot-num">10 / 22</span></footer>
+        </section>
+
+        <section class="slide" data-label="11 Dunder Name" data-screen-label="11 Dunder Name">
+          <header class="head"><span class="kicker">Module</span><span class="folio">11</span></header>
+          <h2 class="title">__name__</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">모든 모듈이 가진 자기 이름, <strong>__name__</strong></p>
+            <div class="cols">
+              <div class="fig-stack">
+                <pre class="code tight"><span class="c"># calc.py</span>
+<span class="fn">print</span>(<span class="s">"모듈 이름:"</span>, __name__)
+
+
+<span class="k">def</span> add(a, b):
+    <span class="k">return</span> a + b</pre>
+                <ul class="ul">
+                  <li><strong>직접 실행</strong> — __main__, 이 파일이 프로그램의 시작점</li>
+                  <li><strong>import</strong> — 파일 이름, 남에게 불려 온 부품</li>
+                  <li><strong>한 글자 차이</strong> — 실행될 때만 도는 코드를 가르는 기준</li>
+                </ul>
+              </div>
+              <div class="fig-stack">
+                <pre class="term tight"><span class="pr">$</span> python calc.py
+모듈 이름: __main__</pre>
+                <pre class="term tight"><span class="pr">$</span> python -c <span class="s">"import calc"</span>
+모듈 이름: calc</pre>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:50%"></i></div><span class="foot-num">11 / 22</span></footer>
+        </section>
+
+        <section class="slide" data-label="12 Entry Point" data-screen-label="12 Entry Point">
+          <header class="head"><span class="kicker">Module</span><span class="folio">12</span></header>
+          <h2 class="title">진입점</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="right" style="--cde-cols: 1;"><div class="cde-text"><ul class="ul">
+                <li><strong>import 시</strong> — 함수만 제공</li>
+                <li><strong>직접 실행 시</strong> — main 실행</li>
+                <li><strong>용도</strong> — 데모, 간단한 점검 코드 자리</li>
+                <li><strong>빈도</strong> — 파이썬에서 가장 흔한 관용구</li>
+              </ul><p class="note"><strong>가드 없으면</strong> — import 하는 순간 프로그램 실행. 모듈은 부품, 프로그램이 아님</p></div><div class="cde-media" style="--cde-cols: 1;"><pre data-run="" class="code"><span class="c"># calc.py
+</span><span class="k">def </span><span class="fn">add</span>(a, b):
+    <span class="k">return</span> a + b
+
+<span class="k">def </span><span class="fn">main</span>():
+    <span class="fn">print</span>(add(<span class="no">1</span>, <span class="no">2</span>))
+
+<span class="k">if</span> __name__ == <span class="s">"__main__"</span>:
+    main()</pre></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:55%"></i></div><span class="foot-num">12 / 22</span></footer>
+        </section>
+
+        <section class="slide" data-label="13 Package" data-screen-label="13 Package">
+          <header class="head"><span class="kicker">Package</span><span class="folio">13</span></header>
+          <h2 class="title">패키지</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="right" style="--cde-cols: 1;"><div class="cde-text"><p class="lead">모듈이 파일이면, <strong>패키지는 모듈을 담는 디렉터리</strong></p><ul class="ul">
+                <li><strong>묶음</strong> — 관련 모듈을 하나의 이름 아래로</li>
+                <li><strong>계층</strong> — 점으로 표현</li>
+                <li><strong>서브패키지</strong> — 디렉터리 안의 디렉터리</li>
+                <li><strong>확장성</strong> — 규모가 커져도 이름 충돌 없음</li>
+              </ul></div><div class="cde-media" style="--cde-cols: 1;"><pre class="code tight">sensorkit/
+├── __init__.py
+├── io.py
+└── filters/
+    ├── __init__.py
+    └── moving_average.py</pre><pre data-run="" class="code xs"><span class="k">from</span> sensorkit.filters <span class="k">import</span> moving_average
+<span class="c"># 패키지 . 서브패키지 . 이름</span></pre></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:59%"></i></div><span class="foot-num">13 / 22</span></footer>
+        </section>
+
+        <section class="slide" data-label="14 Init File" data-screen-label="14 Init File">
+          <header class="head"><span class="kicker">Package</span><span class="folio">14</span></header>
+          <h2 class="title">__init__.py</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="right" style="--cde-cols: 1;"><div class="cde-text"><ul class="ul">
+                <li><strong>표식</strong> — 이 디렉터리는 패키지</li>
+                <li><strong>실행 시점</strong> — 패키지 import 시 가장 먼저</li>
+                <li><strong>공개 API</strong> — 내부 모듈을 끌어올려 노출</li>
+                <li><strong>보관</strong> — 버전, 기본 설정</li>
+              </ul><p class="note"><strong>Python 3.3 이후</strong> — 없어도 동작. 공개 API 를 정하려면 명시 권장</p></div><div class="cde-media" style="--cde-cols: 1;"><pre class="code xs"><span class="c"># sensorkit/__init__.py
+</span><span class="k">from </span>.io <span class="k">import </span>load_csv
+<span class="k">from </span>.filters <span class="k">import </span>moving_average
+
+__all__ = [<span class="s">"load_csv"</span>, <span class="s">"moving_average"</span>]
+__version__ = <span class="s">"0.1.0"</span></pre><pre data-run="" class="code xs"><span class="k">import </span>sensorkit
+sensorkit.load_csv(<span class="s">"log.csv"</span>)  <span class="c"># 내부 경로 몰라도 사용</span></pre></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:64%"></i></div><span class="foot-num">14 / 22</span></footer>
+        </section>
+
+        <section class="slide" data-label="15 Layout" data-screen-label="15 Layout">
+          <header class="head"><span class="kicker">Package</span><span class="folio">15</span></header>
+          <h2 class="title">디렉터리 구조</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="bottom" style="--cde-cols: 2;"><div class="cde-text"><p class="note"><strong>분리 기준</strong> — 역할이 다르면 파일 분리. 한 디렉터리에 대여섯 개 초과 시 서브패키지</p></div><div class="cde-media" style="--cde-cols: 2;"><pre class="code tight">sensorkit/
+├── __init__.py
+├── io.py
+├── clean.py
+├── filters/
+│   ├── __init__.py
+│   ├── moving_average.py
+│   └── lowpass.py
+└── plot.py</pre><table class="tbl">
+                <thead><tr><th>모듈</th><th>역할</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>io</strong></td><td>파일 읽기와 쓰기</td></tr>
+                  <tr><td><strong>clean</strong></td><td>결측값, 이상치 처리</td></tr>
+                  <tr><td><strong>filters</strong></td><td>신호 필터 모음</td></tr>
+                  <tr><td><strong>plot</strong></td><td>시각화 헬퍼</td></tr>
+                </tbody>
+              </table></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:68%"></i></div><span class="foot-num">15 / 22</span></footer>
+        </section>
+
+        <section class="slide" data-label="16 Absolute Import" data-screen-label="16 Absolute Import">
+          <header class="head"><span class="kicker">Package</span><span class="folio">16</span></header>
+          <h2 class="title">절대 import</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="bottom" style="--cde-cols: 2;"><div class="cde-text"><h3 class="card-h leaf">절대 경로, 권장</h3><ul class="ul leaf">
+                  <li><strong>일관성</strong> — 어디서 읽든 경로 동일</li>
+                  <li><strong>명시성</strong> — 길지만 출처 분명</li>
+                </ul><h3 class="card-h sky">상대 경로</h3><ul class="ul">
+                  <li><strong>점 하나</strong> — 현재 패키지, 둘은 상위</li>
+                  <li><strong>이름 독립</strong> — 패키지명 변경에도 동작</li>
+                </ul></div><div class="cde-media" style="--cde-cols: 2;"><pre class="code on-soft xs"><span class="c"># sensorkit/filters/lowpass.py
+</span><span class="k">from </span>sensorkit.io <span class="k">import </span>load_csv</pre><pre class="code xs"><span class="c"># sensorkit/filters/lowpass.py
+</span><span class="k">from </span>..io <span class="k">import </span>load_csv
+<span class="k">from </span>.moving_average <span class="k">import </span>moving_average</pre></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:73%"></i></div><span class="foot-num">16 / 22</span></footer>
+        </section>
+
+        <section class="slide" data-label="17 Relative Pitfall" data-screen-label="17 Relative Pitfall">
+          <header class="head"><span class="kicker">Package</span><span class="folio">17</span></header>
+          <h2 class="title">상대 import 함정</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="right" style="--cde-cols: 1;"><div class="cde-text"><h3 class="card-h coral">스크립트로 직접 실행하면 실패</h3><ul class="ul coral">
+                <li><strong>원인</strong> — 직접 실행된 파일의 이름은 __main__</li>
+                <li><strong>결과</strong> — 소속 패키지 상실, 점 표기 해석 불가</li>
+              </ul><h3 class="card-h leaf">해결: -m 실행</h3><p class="note"><strong>실행 위치</strong> — 패키지 바깥 디렉터리</p></div><div class="cde-media" style="--cde-cols: 1;"><pre class="term on-soft xs">$ python sensorkit/filters/lowpass.py
+ImportError: attempted relative <span class="k">import</span>
+<span class="k">with</span> no known parent package</pre><pre class="term on-soft xs"><span class="pr">$</span> python -m sensorkit.filters.lowpass</pre></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:77%"></i></div><span class="foot-num">17 / 22</span></footer>
+        </section>
+
+        <section class="slide" data-label="18 Standard Library" data-screen-label="18 Standard Library">
+          <header class="head"><span class="kicker">Environment</span><span class="folio">18</span></header>
+          <h2 class="title">표준 라이브러리</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="text" style="--cde-cols: 1;"><div class="cde-text"><div class="grid8">
+              <div class="std"><span class="std-n">os, sys</span><span class="std-d">운영체제, 인터프리터 정보</span></div>
+              <div class="std"><span class="std-n">pathlib</span><span class="std-d">경로를 객체로</span></div>
+              <div class="std"><span class="std-n">json</span><span class="std-d">JSON 직렬화</span></div>
+              <div class="std"><span class="std-n">csv</span><span class="std-d">표 형식 입출력</span></div>
+              <div class="std"><span class="std-n">datetime</span><span class="std-d">날짜와 시간 계산</span></div>
+              <div class="std"><span class="std-n">math, statistics</span><span class="std-d">수학, 기초 통계</span></div>
+              <div class="std"><span class="std-n">random</span><span class="std-d">난수와 표본 추출</span></div>
+              <div class="std"><span class="std-n">time</span><span class="std-d">경과 시간, 지연</span></div>
+              <div class="std"><span class="std-n">collections</span><span class="std-d">Counter, defaultdict, deque</span></div>
+              <div class="std"><span class="std-n">itertools</span><span class="std-d">반복과 조합 도구</span></div>
+            </div><p class="note"><strong>설치 불필요</strong> — 바로 import. 새 패키지를 찾기 전에 먼저 확인</p></div><div class="cde-media" style="--cde-cols: 1;"></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:82%"></i></div><span class="foot-num">18 / 22</span></footer>
+        </section>
+
+        <section class="slide" data-label="19 pip" data-screen-label="19 pip">
+          <header class="head"><span class="kicker">Environment</span><span class="folio">19</span></header>
+          <h2 class="title">pip</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="right" style="--cde-cols: 1;"><div class="cde-text"><ul class="ul">
+                <li><strong>PyPI</strong> — 수십만 개의 공개 패키지</li>
+                <li><strong>requirements.txt</strong> — 팀 환경 공유</li>
+                <li><strong>버전 고정</strong> — 재현의 전제</li>
+              </ul><p class="note"><strong>==</strong> 정확히 그 버전, <strong>&gt;=</strong> 그 이상. 협업에서는 정확한 고정</p></div><div class="cde-media" style="--cde-cols: 1;"><pre class="term tight"><span class="pr">$</span> pip install numpy pandas
+<span class="pr">$</span> pip list
+<span class="pr">$</span> pip show numpy
+<span class="pr">$</span> pip freeze &gt; requirements.txt
+<span class="pr">$</span> pip install -r requirements.txt</pre><pre class="code tight"><span class="c"># requirements.txt
+</span>numpy==<span class="no">2.1.0</span>
+pandas&gt;=<span class="no">2.0</span>,&lt;<span class="no">3.0</span></pre></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:86%"></i></div><span class="foot-num">19 / 22</span></footer>
+        </section>
+
+        <section class="slide" data-label="20 Virtualenv" data-screen-label="20 Virtualenv">
+          <header class="head"><span class="kicker">Environment</span><span class="folio">20</span></header>
+          <h2 class="title">가상환경</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="right" style="--cde-cols: 1;"><div class="cde-text"><ul class="ul">
+                <li><strong>격리</strong> — 프로젝트마다 독립된 패키지 공간</li>
+                <li><strong>전역 보호</strong> — 시스템 파이썬 무오염</li>
+                <li><strong>공존</strong> — A 는 numpy 1.x, B 는 2.x</li>
+                <li><strong>표시</strong> — 활성화 시 프롬프트에 이름</li>
+              </ul><p class="note"><strong>.venv 는 비공유</strong> — .gitignore 등록. 저장소에는 requirements.txt 만</p></div><div class="cde-media" style="--cde-cols: 1;"><pre class="term tight"><span class="pr">$</span> python -m venv .venv
+<span class="pr">$</span> source .venv/bin/activate
+<span class="c">  # Windows: .venv\Scripts\activate
+</span><span class="pr">(.venv) $</span> pip install numpy
+<span class="pr">(.venv) $</span> deactivate</pre></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:91%"></i></div><span class="foot-num">20 / 22</span></footer>
+        </section>
+
+        <section class="slide" data-label="21 Terms" data-screen-label="21 Terms">
+          <header class="head"><span class="kicker">Wrap Up</span><span class="folio">21</span></header>
+          <h2 class="title">용어</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="bottom" style="--cde-cols: 1; --cde-a: 36.6%;"><div class="cde-text"><p class="note"><strong>포함 관계</strong> — 파일이 디렉터리에 담기고, 디렉터리가 설치 단위로 묶임</p></div><div class="cde-media" style="--cde-cols: 1;"><table class="tbl">
+              <thead><tr><th>용어</th><th>실체</th><th>예</th></tr></thead>
+              <tbody>
+                <tr><td><strong>모듈</strong></td><td>.py 파일 하나</td><td>calc.py, json</td></tr>
+                <tr><td><strong>패키지</strong></td><td>모듈을 담은 디렉터리</td><td>sensorkit, numpy</td></tr>
+                <tr><td><strong>라이브러리</strong></td><td>설치와 배포의 단위</td><td>numpy, Pandas</td></tr>
+              </tbody>
+            </table></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:95%"></i></div><span class="foot-num">21 / 22</span></footer>
+        </section>
+
+        <section class="slide" data-label="22 Wrap Up" data-screen-label="22 Wrap Up">
+          <header class="head"><span class="kicker">Wrap Up</span><span class="folio">22</span></header>
+          <h2 class="title">정리</h2>
+          <div class="rule"></div>
+          <div class="body" data-cde-layout="text" style="--cde-cols: 1;"><div class="cde-text"><div class="cols3">
+              <div class="card soft">
+                <h3 class="card-h sky">모듈</h3>
+                <ul class="ul">
+                  <li><strong>단위</strong> — .py 파일 하나 = 이름 공간 하나</li>
+                  <li><strong>import</strong> — 출처가 보이는 형태, 별표 금지</li>
+                  <li><strong>탐색</strong> — sys.path 순서가 결과를 가름</li>
+                  <li><strong>진입점</strong> — __name__ 으로 실행과 import 구분</li>
+                </ul>
+              </div>
+              <div class="card">
+                <h3 class="card-h">패키지</h3>
+                <ul class="ul">
+                  <li><strong>단위</strong> — 디렉터리가 모듈 묶음</li>
+                  <li><strong>__init__.py</strong> — 공개 이름을 정하는 자리</li>
+                  <li><strong>경로</strong> — 절대 import 를 기본으로</li>
+                  <li><strong>실행</strong> — 패키지 안 코드는 python -m</li>
+                </ul>
+              </div>
+              <div class="card good">
+                <h3 class="card-h leaf">환경</h3>
+                <ul class="ul leaf">
+                  <li><strong>순서</strong> — 표준 라이브러리부터 확인</li>
+                  <li><strong>설치</strong> — pip 는 가상환경 안에서만</li>
+                  <li><strong>고정</strong> — requirements.txt 로 버전 기록</li>
+                  <li><strong>격리</strong> — 프로젝트마다 .venv 하나</li>
+                </ul>
+              </div>
+            </div><p class="lead sm">다음 — Part 1-2 패키지 만들기: src 레이아웃, pyproject.toml, pip install -e .</p></div><div class="cde-media" style="--cde-cols: 1;"></div></div>
+          <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:100%"></i></div><span class="foot-num">22 / 22</span></footer>
+        </section>
+      
+</deck-stage>
+
+
+
+
+
+</body></html>

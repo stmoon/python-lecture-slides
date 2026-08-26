@@ -1,0 +1,117 @@
+/* Claude Design Editor - layout rules.
+ *
+ * This file ships next to the deck and is linked from it, so a saved deck keeps
+ * its layout with the editor closed (printing included). Loaded after the deck's
+ * own stylesheet; the attribute selector keeps it ahead on specificity.
+ */
+
+.body[data-cde-layout] {
+  display: grid;
+  gap: var(--cde-gap, 28px);
+  flex: 1 1 auto;
+  min-height: 0;
+  align-content: stretch;
+}
+.body[data-cde-layout] > .cde-text,
+.body[data-cde-layout] > .cde-media,
+.body[data-cde-layout] > .cde-col { min-width: 0; min-height: 0; }
+/* A dragged-shut area must not spill into the other one. */
+.body[data-cde-layout] > .cde-text,
+.body[data-cde-layout] > .cde-media { overflow: hidden; }
+
+/* --cde-a sizes the first track. The editor's drag handle writes it inline. */
+.body[data-cde-layout="bottom"],
+.body[data-cde-layout="top"] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: var(--cde-a, auto) minmax(0, 1fr);
+}
+.body[data-cde-layout="right"],
+.body[data-cde-layout="left"] {
+  grid-template-columns: var(--cde-a, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+/* Two columns, each stacking its own text over its own figure. */
+.body[data-cde-layout="quad"] {
+  grid-template-columns: var(--cde-a, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+.cde-col {
+  display: grid;
+  gap: var(--cde-gap, 24px);
+  grid-template-rows: var(--cde-row, auto) minmax(0, 1fr);
+}
+.cde-col > * { min-width: 0; min-height: 0; }
+
+.body[data-cde-layout="text"],
+.body[data-cde-layout="media"] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+
+/* Text first in the DOM always; order decides what the viewer sees first. */
+.body[data-cde-layout="bottom"] > .cde-text,
+.body[data-cde-layout="right"]  > .cde-text { order: 0; }
+.body[data-cde-layout="bottom"] > .cde-media,
+.body[data-cde-layout="right"]  > .cde-media { order: 1; }
+.body[data-cde-layout="top"]  > .cde-media,
+.body[data-cde-layout="left"] > .cde-media { order: 0; }
+.body[data-cde-layout="top"]  > .cde-text,
+.body[data-cde-layout="left"] > .cde-text { order: 1; }
+
+.body[data-cde-layout="text"] > .cde-media,
+.body[data-cde-layout="media"] > .cde-text { display: none; }
+
+/* Side by side means both columns start at the top edge. Areas still stretch
+ * to the full row so figures can use the height; the content packs upward. */
+.body[data-cde-layout] > * { align-self: stretch; }
+.cde-text {
+  display: flex; flex-direction: column; gap: 18px;
+  justify-content: flex-start; align-content: start;
+}
+/* Deck rules like `figure.fig { margin: 22px 0 0 }` carry a type selector, so
+ * these need two classes to outrank them - otherwise one area starts lower
+ * than the other and the two columns no longer line up at the top. */
+.body[data-cde-layout] .cde-text > *,
+.body[data-cde-layout] .cde-media > * { margin: 0; min-width: 0; min-height: 0; }
+
+/* Every figure gets an equal cell, so rows and columns stay aligned. */
+/* --cde-ctpl / --cde-rtpl hold hand-dragged track sizes; without them the
+ * cells stay equal, which is what keeps rows and columns aligned. */
+.cde-media {
+  display: grid;
+  gap: var(--cde-fgap, 44px);
+  grid-template-columns: var(--cde-ctpl, repeat(var(--cde-cols, 1), minmax(0, 1fr)));
+  grid-template-rows: var(--cde-rtpl, none);
+  grid-auto-rows: minmax(0, 1fr);
+  align-items: stretch;
+  justify-items: stretch;
+}
+.body[data-cde-layout] .cde-media > figure { display: flex; flex-direction: column; }
+.body[data-cde-layout] .cde-media > figure > .frame,
+.body[data-cde-layout] .cde-media > figure > span,
+.body[data-cde-layout] .cde-media > figure > picture {
+  flex: 1 1 auto; min-height: 0; max-height: none; display: flex;
+}
+.body[data-cde-layout] .cde-media img,
+.body[data-cde-layout] .cde-media svg {
+  width: 100%; height: 100%; max-width: 100%; max-height: 100%;
+  object-fit: contain;
+}
+.body[data-cde-layout] .cde-media > table,
+.body[data-cde-layout] .cde-media > .tbl { width: 100%; }
+
+/* 표 행 간격. 덱의 `.tbl td` 는 (0,1,1), `:first-child` 변형은 (0,2,1) 이라
+   세로 여백만 덮어쓰려면 클래스 세 개가 필요하다. */
+.body[data-cde-layout] .cde-media .tbl td,
+.body[data-cde-layout] .cde-media table td {
+  padding-top: var(--cde-trow, 16px); padding-bottom: var(--cde-trow, 16px);
+}
+.body[data-cde-layout] .cde-media .tbl th,
+.body[data-cde-layout] .cde-media table th {
+  padding-bottom: calc(var(--cde-trow, 16px) - 2px);
+}
+
+/* 열 폭을 손으로 정한 표만 고정 배치로 바꾼다. 자동 배치는 <col> 폭을 무시한다. */
+.body[data-cde-layout] table[data-cde-fixed] { table-layout: fixed; }
+.body[data-cde-layout] table[data-cde-fixed] td,
+.body[data-cde-layout] table[data-cde-fixed] th { overflow-wrap: break-word; }

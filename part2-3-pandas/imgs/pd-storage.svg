@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1486 354" width="1486" height="354" font-family="sans-serif">
+<rect width="1486" height="354" fill="#ffffff"/>
+<text x="20" y="34" font-size="26" fill="#64748b" text-anchor="start" font-weight="700">ROW STORE</text>
+<text x="210" y="34" font-size="23" fill="#475569" text-anchor="start" font-weight="400">CSV: one record after another</text>
+<rect x="20" y="60" width="110" height="40" rx="6" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+<text x="75.0" y="88.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">t0</text>
+<rect x="134" y="60" width="110" height="40" rx="6" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+<text x="189.0" y="88.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">21.5</text>
+<rect x="248" y="60" width="110" height="40" rx="6" fill="#fef3c7" stroke="#b45309" stroke-width="2"/>
+<text x="303.0" y="88.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">40.2</text>
+<rect x="362" y="60" width="110" height="40" rx="6" fill="#dcfce7" stroke="#15803d" stroke-width="2"/>
+<text x="417.0" y="88.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">ok</text>
+<rect x="502" y="60" width="110" height="40" rx="6" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+<text x="557.0" y="88.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">t1</text>
+<rect x="616" y="60" width="110" height="40" rx="6" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+<text x="671.0" y="88.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">21.6</text>
+<rect x="730" y="60" width="110" height="40" rx="6" fill="#fef3c7" stroke="#b45309" stroke-width="2"/>
+<text x="785.0" y="88.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">40.1</text>
+<rect x="844" y="60" width="110" height="40" rx="6" fill="#dcfce7" stroke="#15803d" stroke-width="2"/>
+<text x="899.0" y="88.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">ok</text>
+<rect x="984" y="60" width="110" height="40" rx="6" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+<text x="1039.0" y="88.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">t2</text>
+<rect x="1098" y="60" width="110" height="40" rx="6" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+<text x="1153.0" y="88.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">21.4</text>
+<rect x="1212" y="60" width="110" height="40" rx="6" fill="#fef3c7" stroke="#b45309" stroke-width="2"/>
+<text x="1267.0" y="88.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">41.0</text>
+<rect x="1326" y="60" width="110" height="40" rx="6" fill="#dcfce7" stroke="#15803d" stroke-width="2"/>
+<text x="1381.0" y="88.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">warn</text>
+<text x="20" y="140" font-size="23" fill="#475569" text-anchor="start" font-weight="400">한 열만 필요해도 모든 바이트를 지나간다</text>
+<text x="20" y="184" font-size="26" fill="#1d4ed8" text-anchor="start" font-weight="700">COLUMN STORE</text>
+<text x="260" y="184" font-size="23" fill="#475569" text-anchor="start" font-weight="400">Parquet: one column at a time</text>
+<rect x="20" y="210" width="110" height="40" rx="6" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+<text x="75.0" y="238.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">t0</text>
+<rect x="134" y="210" width="110" height="40" rx="6" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+<text x="189.0" y="238.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">t1</text>
+<rect x="248" y="210" width="110" height="40" rx="6" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+<text x="303.0" y="238.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">t2</text>
+<text x="20" y="282" font-size="23" fill="#64748b" text-anchor="start" font-weight="700" font-family="monospace">t</text>
+<rect x="388" y="210" width="110" height="40" rx="6" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+<text x="443.0" y="238.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">21.5</text>
+<rect x="502" y="210" width="110" height="40" rx="6" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+<text x="557.0" y="238.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">21.6</text>
+<rect x="616" y="210" width="110" height="40" rx="6" fill="#dbeafe" stroke="#1d4ed8" stroke-width="2"/>
+<text x="671.0" y="238.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">21.4</text>
+<text x="388" y="282" font-size="23" fill="#1d4ed8" text-anchor="start" font-weight="700" font-family="monospace">temp</text>
+<rect x="756" y="210" width="110" height="40" rx="6" fill="#fef3c7" stroke="#b45309" stroke-width="2"/>
+<text x="811.0" y="238.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">40.2</text>
+<rect x="870" y="210" width="110" height="40" rx="6" fill="#fef3c7" stroke="#b45309" stroke-width="2"/>
+<text x="925.0" y="238.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">40.1</text>
+<rect x="984" y="210" width="110" height="40" rx="6" fill="#fef3c7" stroke="#b45309" stroke-width="2"/>
+<text x="1039.0" y="238.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">41.0</text>
+<text x="756" y="282" font-size="23" fill="#b45309" text-anchor="start" font-weight="700" font-family="monospace">hum</text>
+<rect x="1124" y="210" width="110" height="40" rx="6" fill="#dcfce7" stroke="#15803d" stroke-width="2"/>
+<text x="1179.0" y="238.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">ok</text>
+<rect x="1238" y="210" width="110" height="40" rx="6" fill="#dcfce7" stroke="#15803d" stroke-width="2"/>
+<text x="1293.0" y="238.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">ok</text>
+<rect x="1352" y="210" width="110" height="40" rx="6" fill="#dcfce7" stroke="#15803d" stroke-width="2"/>
+<text x="1407.0" y="238.64" font-size="24" fill="#0f172a" text-anchor="middle" font-weight="400" font-family="monospace">warn</text>
+<text x="1124" y="282" font-size="23" fill="#15803d" text-anchor="start" font-weight="700" font-family="monospace">status</text>
+<text x="20" y="328" font-size="23" fill="#475569" text-anchor="start" font-weight="400">필요한 열 덩어리만 읽는다. 같은 열은 값이 닮아 잘 압축된다</text>
+</svg>
