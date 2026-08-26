@@ -614,7 +614,7 @@ np.split(x, <span class="no">3</span>)
 
         <section class="slide" data-label="22 요소별 연산" data-screen-label="22 요소별 연산">
           <header class="head"><span class="kicker">NumPy</span><span class="folio">22</span></header>
-          <h2 class="title">요소별 연산과 벡터화</h2>
+          <h2 class="title">요소별 연산 (element-wise)</h2>
           <div class="rule"></div>
           <div class="body">
             <div class="cols">
@@ -879,7 +879,7 @@ np.sort(a)      <span class="c"># [1 2 3]  복사본
             </div>
             <div class="cols">
               <div class="card">
-                <h3 class="card-h sky">* 는 요소별 곱</h3>
+                <h3 class="card-h sky">* 는 요소별 곱 (element-wise)</h3>
                 <pre data-run="" class="code tight">A = np.array([[<span class="no">1</span>, <span class="no">2</span>],
               [<span class="no">3</span>, <span class="no">4</span>]])
 A * A
@@ -887,7 +887,7 @@ A * A
 #  [ 9 16]]</span></pre>
               </div>
               <div class="card soft">
-                <h3 class="card-h sky">@ 는 행렬 곱</h3>
+                <h3 class="card-h sky">@ 는 행렬 곱 (matrix product)</h3>
                 <pre data-run="" class="code on-soft tight">A @ A
 <span class="c"># [[ 7 10]
 #  [15 22]]
@@ -896,7 +896,7 @@ A * A
 </span>A.dot(A)   <span class="c"># @ 와 같다</span></pre>
               </div>
             </div>
-            <p class="note">수식을 그대로 옮길 때 <b>곱셈 기호를 확인</b>하는 습관이 필요하다. 둘은 shape은 같아도 결과가 전혀 다르다.</p>
+            <p class="note">수식을 옮길 때 <b>곱셈 기호 확인</b> 필수. 요소별 곱(element-wise product, Hadamard product)과 행렬 곱(matrix product)은 shape 이 같아도 결과가 전혀 다름</p>
           </div>
           <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:84%"></i></div><span class="foot-num">31 / 37</span></footer>
           <script type="text/x-run-setup">
