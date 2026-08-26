@@ -607,7 +607,7 @@ np.split(x, <span class="no">3</span>)
 </span>np.array_split(x, <span class="no">4</span>)
 <span class="c"># 나누어 떨어져도 된다</span></pre>
             </div>
-            <p class="note">결합은 <b>새 메모리를 할당</b>한다. 루프 안에서 반복해 붙이면 느리다. 리스트에 모은 뒤 마지막에 한 번만 concatenate 한다.</p>
+            <p class="note">결합(vstack, hstack, concatenate)은 <b>새 메모리를 할당</b>한다.<br>루프 안에서 반복해 붙이면 느리다. 리스트에 모은 뒤 마지막에 한 번만 concatenate 한다.</p>
           </div>
           <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:57%"></i></div><span class="foot-num">21 / 37</span></footer>
         </section>
@@ -648,9 +648,9 @@ a + b     <span class="c"># [11 22 33]
                   <li>1인 축을 복사하듯이 늘려 맞춘다</li>
                   <li>그 외에는 오류를 낸다</li>
                 </ol>
-                <pre class="code xs">(<span class="no">3</span>, <span class="no">4</span>) + (<span class="no">4</span>,)    <span class="c"># OK
-</span>(<span class="no">3</span>, <span class="no">4</span>) + (<span class="no">3</span>, <span class="no">1</span>)  <span class="c"># OK
-</span>(<span class="no">3</span>, <span class="no">4</span>) + (<span class="no">3</span>,)    <span class="err"># ValueError</span></pre>
+                <pre class="code xs">(<span class="no">4</span>, <span class="no">3</span>) + (<span class="no">3</span>,)    <span class="c"># OK
+</span>(<span class="no">4</span>, <span class="no">3</span>) + (<span class="no">4</span>, <span class="no">1</span>)  <span class="c"># OK
+</span>(<span class="no">4</span>, <span class="no">3</span>) + (<span class="no">4</span>,)    <span class="err"># ValueError</span></pre>
               </div>
               <div style="display:flex;flex-direction:column;gap:24px">
                 <figure class="fig plain" style="max-width:520px">
@@ -1083,6 +1083,7 @@ a = np.array([1, 2, 3])
         </section>
       
 </deck-stage>
+
 
 
 
