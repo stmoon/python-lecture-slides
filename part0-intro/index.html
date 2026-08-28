@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Part 0 소개</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;family=Atkinson+Hyperlegible:wght@400;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Noto+Sans+KR:wght@400;500;700;900&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./deck.css">
+<script defer="" src="./deck.js"></script>
+<style>
+@page { size: 1920px 1080px; margin: 0; }
+html, body { margin: 0; padding: 0; background: #fff; }
+:root { color-scheme: light; }
+deck-stage { display: block; }
+.slide {
+  width: 1920px; height: 1080px; overflow: hidden; box-sizing: border-box;
+  break-after: page; page-break-after: always;
+}
+.slide:last-child { break-after: auto; page-break-after: auto; }
+</style>
+<link rel="stylesheet" href="cde-layout.css"></head>
+<body>
+<deck-stage>
+        <section class="slide cover" data-label="표지" data-screen-label="표지">
+          <img class="cover-logo" src="./cbnu_logo.png" alt="충북대학교">
+          <span class="cover-kicker">K-뉴딜 아카데미 · AI를 위한 PYTHON · PART 0</span>
+          <h1 class="cover-title">소개</h1>
+          <p class="cover-sub"><br></p>
+          <div class="cover-rule"></div>
+          <p class="cover-by">충북대학교 지능로봇공학과 <b>문성태 교수</b></p>
+          <p class="cover-host">본 교육은 <b>K-뉴딜 아카데미</b> 교육과정의 일환으로 진행된다</p>
+        </section>
+
+        <section class="slide" data-label="01 강의자 소개" data-screen-label="01 강의자 소개">
+          <header class="head"><span class="kicker">Lecturer</span><span class="folio">01</span></header>
+          <h2 class="title">강의자 소개</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="cols-wide">
+              <div style="display:flex; flex-direction:column; gap:22px; min-width:0">
+                <div class="card soft" style="padding:24px 30px; gap:12px">
+                  <h3 class="card-h sky">문성태 <span style="font-size:26px; color:var(--ink-muted); font-weight:400">Sungtae Moon</span></h3>
+                  <p class="note">무인이동체 자율비행, 드론 군집제어, 비행제어컴퓨터</p>
+                </div>
+                <ul class="ul">
+                  <li><strong>2023 ~ 현재</strong> — 충북대학교 지능로봇공학과 부교수</li>
+                  <li><strong>2022 ~ 2023</strong> — 한국기술교육대학교 조교수</li>
+                  <li><strong>2012 ~ 2022</strong> — 한국항공우주연구원 선임연구원. 드론 군집비행 기술 연구</li>
+                  <li><strong>2010 ~ 2011</strong> — 국가보안기술연구소 연구원. 보안 운영체제 연구</li>
+                  <li><strong>2007 ~ 2010</strong> — 국방과학연구소 연구원. KHP 임무컴퓨터 연구</li>
+                </ul>
+                <p class="note"><strong>연구실</strong> — SUV Lab (Smart Unmanned Vehicles Lab), 충북대학교</p>
+              </div>
+              <figure class="fig"><img src="./imgs/lecturer.png" alt="강의자 사진" style="max-height:620px; align-self:center"></figure>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 0 소개</span><div class="bar"><i style="width:20%"></i></div><span class="foot-num">01 / 05</span></footer>
+        </section>
+
+
+        <section class="slide" data-label="02 오늘 배우는 것" data-screen-label="02 오늘 배우는 것">
+          <header class="head"><span class="kicker">Overview</span><span class="folio">02</span></header>
+          <h2 class="title">오늘 배우는 것</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">코드를 나누는 법, 그리고 데이터를 다루는 법</p>
+            <div class="cols">
+              <div class="card soft" style="padding:24px 28px">
+                <h3 class="card-h sky">Part 1 · 모듈과 패키지</h3>
+                <ul class="ul">
+                  <li><strong>개념</strong> — 모듈, 패키지, 라이브러리의 구분과 import 규칙</li>
+                  <li><strong>제작</strong> — 내 코드를 패키지로 묶고 설치해서 쓰기</li>
+                  <li><strong>결과</strong> — 한 번 쓴 코드를 다음 프로젝트에서 다시 쓴다</li>
+                </ul>
+              </div>
+              <div class="card good" style="padding:24px 28px">
+                <h3 class="card-h leaf">Part 2 · 데이터 분석 라이브러리</h3>
+                <ul class="ul leaf">
+                  <li><strong>Matplotlib</strong> — 숫자를 그림으로 바꿔 눈으로 확인</li>
+                  <li><strong>NumPy</strong> — 배열과 행렬을 루프 없이 계산</li>
+                  <li><strong>Pandas</strong> — 표 형태 데이터를 읽고 정리</li>
+                  <li><strong>종합 실습</strong> — 센서 로그를 실제로 분석하고 가공</li>
+                </ul>
+              </div>
+            </div>
+            <div class="chips">
+              <span class="chip">module</span>
+              <span class="chip">package</span>
+              <span class="chip leaf">matplotlib</span>
+              <span class="chip leaf">numpy</span>
+              <span class="chip leaf">pandas</span>
+              <span class="chip sun">sensor log</span>
+            </div>
+            <p class="note"><strong>목표</strong> — 문법 암기가 아닌, 보유한 데이터를 당일 바로 처리할 수 있는 수준 확보</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 0 소개</span><div class="bar"><i style="width:40%"></i></div><span class="foot-num">02 / 05</span></footer>
+        </section>
+
+        <section class="slide" data-label="03 수업 스케쥴" data-screen-label="03 수업 스케쥴">
+          <header class="head"><span class="kicker">Schedule</span><span class="folio">03</span></header>
+          <h2 class="title">수업 스케쥴</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <table class="tbl" style="font-size:31px">
+              <thead>
+                <tr><th style="width:330px; padding:12px 20px">시각</th><th style="padding:12px 20px">내용</th><th style="width:180px; padding:12px 20px">실습</th><th style="width:170px; padding:12px 20px">시간</th></tr>
+              </thead>
+              <tbody style="--pad:0">
+                <tr><td style="padding:11px 20px"><strong>09:00 - 09:10</strong></td><td style="padding:11px 20px">Part 0 · 소개</td><td style="padding:11px 20px">-</td><td style="padding:11px 20px">10분</td></tr>
+                <tr><td style="padding:11px 20px"><strong>09:10 - 10:10</strong></td><td style="padding:11px 20px">Part 1-1 · 모듈과 패키지의 개념</td><td style="padding:11px 20px">-</td><td style="padding:11px 20px">1시간</td></tr>
+                <tr><td style="padding:11px 20px"><strong>10:10 - 11:10</strong></td><td style="padding:11px 20px">Part 1-2 · 모듈과 패키지 만들기</td><td style="padding:11px 20px">lab01</td><td style="padding:11px 20px">1시간</td></tr>
+                <tr><td style="padding:11px 20px"><strong>11:10 - 12:10</strong></td><td style="padding:11px 20px">Part 2-1 · Matplotlib</td><td style="padding:11px 20px">lab02</td><td style="padding:11px 20px">1시간</td></tr>
+                <tr><td colspan="4" style="padding:11px 20px; color:var(--ink-subtle); font-size:26px">12:10 - 13:00 &nbsp; 점심 &nbsp;·&nbsp; 쉬는 시간은 파트 사이에 배치, 진행 속도에 따라 조정</td></tr>
+                <tr><td style="padding:11px 20px"><strong>13:00 - 14:30</strong></td><td style="padding:11px 20px">Part 2-2 · NumPy</td><td style="padding:11px 20px">lab03</td><td style="padding:11px 20px">1.5시간</td></tr>
+                <tr><td style="padding:11px 20px"><strong>14:30 - 16:00</strong></td><td style="padding:11px 20px">Part 2-3 · Pandas</td><td style="padding:11px 20px">lab04</td><td style="padding:11px 20px">1.5시간</td></tr>
+                <tr><td style="padding:11px 20px"><strong>16:00 - 18:00</strong></td><td style="padding:11px 20px">Part 2-4 · 센서 데이터 로그 분석 및 가공</td><td style="padding:11px 20px">lab05</td><td style="padding:11px 20px">2시간</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 0 소개</span><div class="bar"><i style="width:60%"></i></div><span class="foot-num">03 / 05</span></footer>
+        </section>
+
+        <section class="slide" data-label="04 수업 자료" data-screen-label="04 수업 자료">
+          <header class="head"><span class="kicker">Materials</span><span class="folio">04</span></header>
+          <h2 class="title">수업 자료</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">전체 슬라이드 공개 주소. 강의 중 각자 열어 두고 진행</p>
+            <div class="card soft" style="padding:26px 32px; gap:12px">
+              <h3 class="card-h sky">https://stmoon.github.io/python-lecture-slides/</h3>
+              <p class="note">브라우저 주소창에 그대로 입력 &nbsp;·&nbsp; 로그인과 설치 불필요 &nbsp;·&nbsp; 파트별 열기 버튼과 PDF 내려받기 제공</p>
+            </div>
+            <div class="cols">
+              <div class="card" style="padding:22px 26px">
+                <h3 class="card-h">구성</h3>
+                <ul class="ul">
+                  <li><strong>슬라이드</strong> — 파트별 덱, 화면 크기에 맞춰 자동 확대</li>
+                  <li><strong>PDF</strong> — 동일 내용의 인쇄용 파일</li>
+                  <li><strong>실습 자료</strong> — 실습 문서와 데이터, 같은 주소에서 내려받기</li>
+                </ul>
+              </div>
+              <div class="card good" style="padding:22px 26px">
+                <h3 class="card-h leaf">보는 방법</h3>
+                <ul class="ul leaf">
+                  <li><strong>다음 장</strong> — 스페이스, 방향키 오른쪽, 슬라이드 클릭</li>
+                  <li><strong>이전 장</strong> — 방향키 왼쪽, Backspace</li>
+                  <li><strong>코드 실행</strong> — 코드 블록의 실행 버튼, 브라우저 내에서 동작 (첫 실행 20초 소요)</li>
+                  <li><strong>수정</strong> — 코드 블록 직접 수정 후 재실행 가능</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 0 소개</span><div class="bar"><i style="width:80%"></i></div><span class="foot-num">04 / 05</span></footer>
+        </section>
+
+        <section class="slide" data-label="05 실습 환경과 진행 방식" data-screen-label="05 실습 환경과 진행 방식">
+          <header class="head"><span class="kicker">Setup</span><span class="folio">05</span></header>
+          <h2 class="title">실습 환경과 진행 방식</h2>
+          <div class="rule"></div>
+          <div class="body" style="padding-top: 14px;">
+            <p class="lead">실습 환경 확인 절차와 강의 진행 방식</p>
+            <div class="cols">
+              <div style="display:flex; flex-direction:column; gap:22px; min-width:0">
+                <pre class="term tight" data-nolines=""><span class="pr">$</span> python --version
+Python 3.11.9
+
+<span class="pr">$</span> pip install numpy pandas matplotlib
+
+<span class="pr">$</span> python -c <span class="s">"import numpy, pandas, matplotlib"</span></pre>
+                <p class="note"><strong>버전</strong> — 파이썬 3.10 이상 권장 &nbsp;·&nbsp; 세 줄 모두 오류 없이 끝나면 준비 완료</p>
+              </div>
+              <div class="card" style="padding:22px 26px">
+                <h3 class="card-h">진행 방식</h3>
+                <ul class="ul">
+                  <li><strong>이론</strong> — 슬라이드의 코드를 그 자리에서 실행하며 확인</li>
+                  <li><strong>연습문제</strong> — 파트별 3~9문제, 직접 채운 뒤 즉시 실행</li>
+                  <li><strong>실습</strong> — 실습 문서에 따라 개별 진행</li>
+                  <li><strong>마무리</strong> — 센서 로그 한 건을 적재부터 리포트까지 처리</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 0 소개</span><div class="bar"><i style="width:100%"></i></div><span class="foot-num">05 / 05</span></footer>
+        </section>
+</deck-stage>
+
+
+</body></html>

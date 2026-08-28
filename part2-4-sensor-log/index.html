@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Part 2-4 센서 로그 실습</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;family=Atkinson+Hyperlegible:wght@400;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Noto+Sans+KR:wght@400;500;700;900&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./deck.css">
+<script defer="" src="./deck.js"></script>
+<style>
+@page { size: 1920px 1080px; margin: 0; }
+html, body { margin: 0; padding: 0; background: #fff; }
+:root { color-scheme: light; }
+deck-stage { display: block; }
+.slide {
+  width: 1920px; height: 1080px; overflow: hidden; box-sizing: border-box;
+  break-after: page; page-break-after: always;
+}
+.slide:last-child { break-after: auto; page-break-after: auto; }
+</style>
+<link rel="stylesheet" href="cde-layout.css"></head>
+<body>
+<deck-stage>
+        <section class="slide cover" data-label="표지" data-screen-label="표지">
+          <img class="cover-logo" src="./cbnu_logo.png" alt="충북대학교">
+          <span class="cover-kicker">K-뉴딜 아카데미 · AI를 위한 PYTHON · PART 2-4</span>
+          <h1 class="cover-title">센서 로그 실습</h1>
+          <p class="cover-sub">ROS2 mcap 과 PX4 ulog 로 하는 로그 분석</p>
+          <div class="cover-rule"></div>
+          <p class="cover-by">충북대학교 지능로봇공학과 <b>문성태 교수</b></p>
+          <p class="cover-host">본 교육은 <b>K-뉴딜 아카데미</b> 교육과정의 일환으로 진행된다</p>
+        </section>
+
+        <section class="slide" data-label="01 실습 개요" data-screen-label="01 실습 개요">
+          <header class="head"><span class="kicker">Overview</span><span class="folio">01</span></header>
+          <h2 class="title">실습 개요</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">드론 1대의 5분 비행 로그 2종을 분석 가능한 데이터로 가공</p>
+            <div class="cols">
+              <div class="card soft" style="padding:24px 28px">
+                <h3 class="card-h sky">주어지는 것</h3>
+                <ul class="ul">
+                  <li><strong>flight.mcap</strong> — ROS2 가 기록한 토픽 4개, 0.6 MB</li>
+                  <li><strong>flight.ulg</strong> — PX4 가 기록한 메시지 4개, 0.8 MB</li>
+                  <li><strong>loaders.py</strong> — 로그를 DataFrame 으로 여는 코드</li>
+                  <li><strong>노트북</strong> — 구글 Colab 에서 바로 열린다</li>
+                </ul>
+              </div>
+              <div class="card good" style="padding:24px 28px">
+                <h3 class="card-h leaf">만드는 것</h3>
+                <ul class="ul leaf">
+                  <li><strong>out/clean.csv</strong> — 1초 격자로 맞춘 통합 시계열</li>
+                  <li><strong>out/segments.csv</strong> — 비행 구간별 통계표</li>
+                  <li><strong>out/dashboard.png</strong> — 2행 2열 대시보드</li>
+                  <li><strong>flightkit/</strong> — 재사용 함수 패키지</li>
+                </ul>
+              </div>
+            </div>
+            <p class="note"><strong>사용 도구</strong> — 모듈과 패키지, Matplotlib, NumPy, Pandas &nbsp;·&nbsp; 로그 판독 코드는 제공</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-4 센서 로그 실습</span><div class="bar"><i style="width:11%"></i></div><span class="foot-num">01 / 09</span></footer>
+        </section>
+
+        <section class="slide" data-label="02 ROS2 와 토픽" data-screen-label="02 ROS2 와 토픽">
+          <header class="head"><span class="kicker">ROS2</span><span class="folio">02</span></header>
+          <h2 class="title">ROS2 와 토픽</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">로봇 소프트웨어를 노드 단위로 분할, 노드 간 통신은 토픽으로 수행</p>
+            <div class="cols">
+              <div style="display:flex; flex-direction:column; gap:22px; min-width:0">
+                <ul class="ul">
+                  <li><strong>노드</strong> — 단일 기능 단위 프로그램. 카메라 드라이버, 경로 계획, 모터 제어</li>
+                  <li><strong>토픽</strong> — 노드 사이를 잇는 이름 있는 통로. <code>/imu/data</code>, <code>/cmd_vel</code></li>
+                  <li><strong>메시지</strong> — 토픽에 흐르는 값의 구조. 타입별로 필드 고정</li>
+                  <li><strong>기록</strong> — 이 흐름을 파일로 남기는 도구가 rosbag2</li>
+                </ul>
+              </div>
+              <pre class="code tight"><span class="c"># sensor_msgs/msg/Imu 의 구조</span>
+Imu
+├── header
+│   ├── stamp        <span class="c"># 시각</span>
+│   └── frame_id     <span class="c"># 기준 좌표계</span>
+├── orientation      <span class="c"># 자세 (쿼터니언)</span>
+├── angular_velocity <span class="c"># 각속도 x, y, z</span>
+└── linear_acceleration
+    ├── x, y
+    └── z            <span class="c"># 중력 포함 9.8 근처</span></pre>
+            </div>
+            <p class="note"><strong>중첩 구조</strong> — 메시지 안에 메시지 포함 &nbsp;·&nbsp; 표로 펼칠 때의 열 이름은 <code>linear_acceleration_z</code></p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-4 센서 로그 실습</span><div class="bar"><i style="width:22%"></i></div><span class="foot-num">02 / 09</span></footer>
+        </section>
+
+        <section class="slide" data-label="03 rosbag2 와 mcap" data-screen-label="03 rosbag2 와 mcap">
+          <header class="head"><span class="kicker">ROS2</span><span class="folio">03</span></header>
+          <h2 class="title">rosbag2 와 mcap</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">여러 토픽을 시간순으로 한 파일에 담는 기록 형식</p>
+            <div class="cols-wide">
+              <table class="tbl">
+                <thead><tr><th>토픽</th><th>메시지 타입</th><th style="width:130px">주기</th><th style="width:130px">행 수</th></tr></thead>
+                <tbody>
+                  <tr><td><code>/imu/data</code></td><td>sensor_msgs/msg/Imu</td><td>25 Hz</td><td>7500</td></tr>
+                  <tr><td><code>/fix</code></td><td>sensor_msgs/msg/NavSatFix</td><td>5 Hz</td><td>1425</td></tr>
+                  <tr><td><code>/cmd_vel</code></td><td>geometry_msgs/msg/Twist</td><td>10 Hz</td><td>3000</td></tr>
+                  <tr><td><code>/temperature</code></td><td>sensor_msgs/msg/Temperature</td><td>1 Hz</td><td>300</td></tr>
+                </tbody>
+              </table>
+              <div class="card" style="padding:22px 26px">
+                <h3 class="card-h">파일 안의 구조</h3>
+                <ul class="ul">
+                  <li><strong>채널</strong> — 토픽 하나</li>
+                  <li><strong>스키마</strong> — 그 토픽의 메시지 구조</li>
+                  <li><strong>메시지</strong> — 시각 + 값</li>
+                  <li><strong>시각</strong> — 1970년 기준 나노초</li>
+                </ul>
+              </div>
+            </div>
+            <p class="note"><strong>토픽마다 다른 열</strong> — 단일 대형 표가 아니라, 토픽 수만큼의 표가 한 파일에 담긴 구조</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-4 센서 로그 실습</span><div class="bar"><i style="width:33%"></i></div><span class="foot-num">03 / 09</span></footer>
+        </section>
+
+        <section class="slide" data-label="04 PX4 와 ulog" data-screen-label="04 PX4 와 ulog">
+          <header class="head"><span class="kicker">PX4</span><span class="folio">04</span></header>
+          <h2 class="title">PX4 와 ulog</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">비행제어 소프트웨어가 내부 메시지를 그대로 남긴 기록</p>
+            <div class="cols-wide">
+              <table class="tbl">
+                <thead><tr><th>메시지</th><th>내용</th><th style="width:130px">주기</th><th style="width:130px">행 수</th></tr></thead>
+                <tbody>
+                  <tr><td><code>sensor_combined</code></td><td>가속도 3축, z축 각속도</td><td>50 Hz</td><td>15000</td></tr>
+                  <tr><td><code>vehicle_local_position</code></td><td>위치와 속도 (NED)</td><td>20 Hz</td><td>6000</td></tr>
+                  <tr><td><code>vehicle_attitude</code></td><td>roll, pitch, yaw</td><td>20 Hz</td><td>6000</td></tr>
+                  <tr><td><code>battery_status</code></td><td>전압, 전류, 잔량</td><td>2 Hz</td><td>600</td></tr>
+                </tbody>
+              </table>
+              <div class="card soft" style="padding:22px 26px">
+                <h3 class="card-h sky">PX4 와 uORB</h3>
+                <ul class="ul">
+                  <li><strong>PX4</strong> — 자세 추정과 모터 명령 담당</li>
+                  <li><strong>uORB</strong> — 내부 모듈 간 메시지 버스</li>
+                  <li><strong>ulog</strong> — uORB 메시지를 파일로 남긴 기록</li>
+                  <li><strong>시각</strong> — 부팅 후 마이크로초</li>
+                </ul>
+              </div>
+            </div>
+            <p class="note"><strong>토픽과 동일한 구조</strong> — 명칭만 메시지일 뿐, 시각 열 1개에 값 열이 붙은 표라는 점은 mcap 과 동일</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-4 센서 로그 실습</span><div class="bar"><i style="width:44%"></i></div><span class="foot-num">04 / 09</span></footer>
+        </section>
+
+        <section class="slide" data-label="05 두 로그의 차이" data-screen-label="05 두 로그의 차이">
+          <header class="head"><span class="kicker">Compare</span><span class="folio">05</span></header>
+          <h2 class="title">두 로그의 차이</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">동일 비행의 서로 다른 기록. 병합 전 맞춰야 할 세 가지</p>
+            <div class="cols3">
+              <div class="card warn" style="padding:22px 26px">
+                <h3 class="card-h coral">시각 기준</h3>
+                <ul class="ul coral">
+                  <li><strong>mcap</strong> — 1970년 기준 나노초</li>
+                  <li><strong>ulog</strong> — 부팅 후 마이크로초</li>
+                  <li><strong>정렬 방법</strong> — 각 로그의 첫 시각을 0 으로 두고 경과 초로 변환</li>
+                </ul>
+              </div>
+              <div class="card warn" style="padding:22px 26px">
+                <h3 class="card-h coral">좌표계</h3>
+                <ul class="ul coral">
+                  <li><strong>ROS2</strong> — ENU, 동-북-상</li>
+                  <li><strong>PX4</strong> — NED, 북-동-하</li>
+                  <li><strong>변환 식</strong> — <code>east = y</code>, <code>north = x</code>, <code>up = -z</code></li>
+                </ul>
+              </div>
+              <div class="card warn" style="padding:22px 26px">
+                <h3 class="card-h coral">주기</h3>
+                <ul class="ul coral">
+                  <li><strong>mcap IMU</strong> — 25 Hz</li>
+                  <li><strong>ulog 가속도</strong> — 50 Hz</li>
+                  <li><strong>정렬 방법</strong> — 동일 주기로 리샘플링한 뒤 결합</li>
+                </ul>
+              </div>
+            </div>
+            <p class="note"><strong>미보정 시</strong> — 계산은 오류 없이 종료되나 두 로그가 서로 다른 시각과 방향을 지시 &nbsp;·&nbsp; 오류 신호가 남지 않음</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-4 센서 로그 실습</span><div class="bar"><i style="width:55%"></i></div><span class="foot-num">05 / 09</span></footer>
+        </section>
+
+        <section class="slide" data-label="06 로그 열기" data-screen-label="06 로그 열기">
+          <header class="head"><span class="kicker">Loaders</span><span class="folio">06</span></header>
+          <h2 class="title">로그 열기</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">로그 판독 코드는 제공. 과제는 DataFrame 을 받은 지점부터 시작</p>
+            <div class="cols">
+              <pre class="code xs"><span class="k">from</span> loaders <span class="k">import</span> load_mcap, load_ulog, describe
+
+topics = load_mcap(<span class="s">"flight.mcap"</span>)
+msgs = load_ulog(<span class="s">"flight.ulg"</span>)
+
+imu = topics[<span class="s">"/imu/data"</span>]
+sc = msgs[<span class="s">"sensor_combined"</span>]
+
+imu.head()
+imu.info()</pre>
+              <pre class="term xs" data-nolines><span class="pr">&gt;&gt;&gt;</span> describe(topics)
+/cmd_vel        3000 rows
+/fix            1425 rows
+/imu/data       7500 rows
+/temperature     300 rows
+
+<span class="pr">&gt;&gt;&gt;</span> imu.columns
+t_ns, orientation_x, ...,
+angular_velocity_z,
+linear_acceleration_x, ..._y, ..._z</pre>
+            </div>
+            <p class="note"><strong>중첩 필드 전개</strong> — <code>linear_acceleration.x</code> 의 열 이름은 <code>linear_acceleration_x</code> &nbsp;·&nbsp; 공분산 배열은 전부 0 이므로 제외</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-4 센서 로그 실습</span><div class="bar"><i style="width:66%"></i></div><span class="foot-num">06 / 09</span></footer>
+        </section>
+
+        <section class="slide" data-label="07 과제 흐름" data-screen-label="07 과제 흐름">
+          <header class="head"><span class="kicker">Tasks</span><span class="folio">07</span></header>
+          <h2 class="title">과제 흐름</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <table class="tbl" style="font-size:27px">
+              <thead><tr><th style="width:70px">#</th><th style="width:330px">과제</th><th style="width:110px">시간</th><th>하는 일</th><th style="width:290px">쓰는 내용</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td><strong>로그 열고 구조 파악</strong></td><td>15분</td><td>표 목록, head/info/describe, 표본 주기 계산</td><td>Pandas 훑어보기</td></tr>
+                <tr><td>2</td><td><strong>시간축 정리</strong></td><td>15분</td><td>경과 초 변환, 중복 제거, 정렬, 끊긴 구간 탐지</td><td>중복 처리, 날짜 시간</td></tr>
+                <tr><td>3</td><td><strong>결측과 이상치</strong></td><td>20분</td><td>센티널 처리, 물리 범위 마스킹, 보간</td><td>불리언 마스킹, 결측</td></tr>
+                <tr><td>4</td><td><strong>단위와 좌표</strong></td><td>15분</td><td>NED 를 ENU 로, 회전 행렬로 장착 오차 보정</td><td>브로드캐스팅, 행렬</td></tr>
+                <tr><td>5</td><td><strong>두 로그 합치기</strong></td><td>20분</td><td>1초 리샘플링 후 결합, 두 출처 값 비교</td><td>리샘플링, merge</td></tr>
+                <tr><td>6</td><td><strong>집계와 시각화</strong></td><td>20분</td><td>비행 구간 판정, 구간 통계표, 2x2 대시보드</td><td>groupby, 서브플롯</td></tr>
+                <tr><td>7</td><td><strong>패키지로 묶기</strong></td><td>15분</td><td>함수를 flightkit 모듈로, 공개 API 정하기</td><td>모듈과 패키지</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-4 센서 로그 실습</span><div class="bar"><i style="width:77%"></i></div><span class="foot-num">07 / 09</span></footer>
+        </section>
+
+        <section class="slide" data-label="08 로그에 숨은 문제" data-screen-label="08 로그에 숨은 문제">
+          <header class="head"><span class="kicker">Traps</span><span class="folio">08</span></header>
+          <h2 class="title">로그에 숨은 문제</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <p class="lead">현장 로그에서 반복되는 결함을 그대로 반영. 결함 탐지까지가 과제 범위</p>
+            <div class="cols">
+              <div class="card warn" style="padding:22px 26px">
+                <h3 class="card-h coral">시간 쪽</h3>
+                <ul class="ul coral">
+                  <li><strong>끊긴 구간</strong> — 특정 토픽의 메시지가 일정 시간 동안 부재</li>
+                  <li><strong>중복 시각</strong> — 동일 시각이 2회 이상 기록</li>
+                  <li><strong>상이한 시계</strong> — 두 로그의 기준 시각 불일치</li>
+                </ul>
+              </div>
+              <div class="card" style="padding:22px 26px">
+                <h3 class="card-h">값 쪽</h3>
+                <ul class="ul">
+                  <li><strong>센티널</strong> — 결측 자리에 -999 등 특수값 기록</li>
+                  <li><strong>스파이크</strong> — 단일 표본만 이탈하는 센서 오류</li>
+                  <li><strong>실제 이벤트</strong> — 값이 이탈하나 제거하면 안 되는 실제 충격 포함</li>
+                  <li><strong>드리프트</strong> — 시간 경과에 따라 한 방향으로 누적되는 편차</li>
+                </ul>
+              </div>
+            </div>
+            <p class="note"><strong>처리 순서</strong> — 물리적으로 불가능한 값을 우선 제거 &nbsp;·&nbsp; 통계(표준편차, z-score)를 먼저 적용하면 실제 이벤트까지 제거됨</p>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-4 센서 로그 실습</span><div class="bar"><i style="width:88%"></i></div><span class="foot-num">08 / 09</span></footer>
+        </section>
+
+        <section class="slide" data-label="09 시작하기" data-screen-label="09 시작하기">
+          <header class="head"><span class="kicker">Start</span><span class="folio">09</span></header>
+          <h2 class="title">시작하기</h2>
+          <div class="rule"></div>
+          <div class="body">
+            <div class="card soft" style="padding:26px 32px; gap:12px">
+              <h3 class="card-h sky">https://stmoon.github.io/python-lecture-slides/</h3>
+              <p class="note">첫 페이지의 <b>실습 데이터</b> 항목에서 노트북과 로그 2종 내려받기 &nbsp;·&nbsp; 노트북은 구글 Colab 에서 실행</p>
+            </div>
+            <div class="cols">
+              <div class="card" style="padding:22px 26px">
+                <h3 class="card-h">첫 셀에서 처리하는 것</h3>
+                <ul class="ul">
+                  <li><strong>설치</strong> — mcap, mcap-ros2-support, pyulog</li>
+                  <li><strong>내려받기</strong> — flight.mcap, flight.ulg, loaders.py</li>
+                  <li><strong>준비</strong> — numpy, pandas, matplotlib 임포트 및 out/ 폴더 생성</li>
+                </ul>
+              </div>
+              <div class="card good" style="padding:22px 26px">
+                <h3 class="card-h leaf">제출물</h3>
+                <ul class="ul leaf">
+                  <li><strong>노트북</strong> — 채운 part2-4-lab.ipynb</li>
+                  <li><strong>결과</strong> — clean.csv, segments.csv, dashboard.png</li>
+                  <li><strong>패키지</strong> — flightkit/</li>
+                  <li><strong>보고</strong> — report.md, 발견 문제와 처리 근거</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <footer class="foot"><span class="foot-sec">Part 2-4 센서 로그 실습</span><div class="bar"><i style="width:100%"></i></div><span class="foot-num">09 / 09</span></footer>
+        </section>
+</deck-stage>
+</body></html>

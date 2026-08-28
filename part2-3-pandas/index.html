@@ -75,11 +75,12 @@ deck-stage { display: block; }
 <deck-stage>
         <section class="slide cover" data-label="표지" data-screen-label="표지">
           <img class="cover-logo" src="./cbnu_logo.png" alt="충북대학교">
-          <span class="cover-kicker">PYTHON 프로그래밍 · PART 2-3</span>
+          <span class="cover-kicker">K-뉴딜 아카데미 · AI를 위한 PYTHON · PART 2-3</span>
           <h1 class="cover-title">Pandas</h1>
           <p class="cover-sub">데이터프레임 활용 및 전처리</p>
           <div class="cover-rule"></div>
           <p class="cover-by">충북대학교 지능로봇공학과 <b>문성태 교수</b></p>
+          <p class="cover-host">본 교육은 <b>K-뉴딜 아카데미</b> 교육과정의 일환으로 진행된다</p>
         </section>
 
         <section class="slide" data-label="01 Pandas 소개" data-screen-label="01 Pandas 소개">
@@ -392,7 +393,7 @@ df.query(<span class="s">"temp &gt; @limit"</span>)</pre>
           <h2 class="title">연습문제 1</h2>
           <div class="rule"></div>
           <div class="body">
-            <p class="lead">df 에서 온도가 30 이상이면서 습도가 40 미만인 행만 골라 몇 개인지 구하시오.</p>
+            <p class="lead">df 에서 <code>temp &gt;= 30</code> 이면서 <code>hum &lt; 40</code> 인 행만 골라 <b>몇 행인지</b> 구하시오.</p>
             <div class="cols">
               <pre data-run="" class="code tight">df.head()
 df.shape
@@ -400,6 +401,8 @@ df.shape
 <span class="err"># IMPLEMENT HERE</span></pre>
               <div class="run-slot"><div data-run-out=""></div></div>
             </div>
+            <p class="note"><strong>df 의 열</strong> — <code>t</code> 유닉스 시각(초), <code>timestamp</code>, <code>day</code>, <code>sensor_id</code>, <code>id</code>, <code>temp</code> 온도, <code>hum</code> 습도, <code>status</code>
+            &nbsp;·&nbsp; <strong>기대 출력</strong> — <code>58</code> (총 602행 중)</p>
           </div>
           <script type="text/x-run-setup">
 df = frame.drop(columns=["unused", "a", "b", "tag", "raw", "ax", "ay", "az"]).copy()
@@ -495,13 +498,15 @@ df[<span class="s">"temp"</span>].interpolate()</pre>
           <h2 class="title">연습문제 2</h2>
           <div class="rule"></div>
           <div class="body">
-            <p class="lead">temp 에 결측이 있다. 결측 개수를 센 뒤 앞뒤 값으로 채우고, 남은 결측이 없는지 확인하시오.</p>
+            <p class="lead">df 의 <code>temp</code> 열에 결측이 있다. (1) 결측 개수를 세고, (2) 앞 값과 뒤 값으로 채운 뒤, (3) 남은 결측이 0 인지 확인하시오.</p>
             <div class="cols">
               <pre data-run="" class="code tight">df["temp"].head(<span class="no">12</span>)
 
 <span class="err"># IMPLEMENT HERE</span></pre>
               <div class="run-slot"><div data-run-out=""></div></div>
             </div>
+            <p class="note"><strong>기대 출력</strong> — 채우기 전 결측 <code>8</code> 개, 채운 뒤 <code>0</code> 개
+            &nbsp;·&nbsp; <strong>주의</strong> — 맨 앞이 결측이면 앞 값이 없다. <code>ffill</code> 다음에 <code>bfill</code> 까지 해야 0 이 된다</p>
           </div>
           <script type="text/x-run-setup">
 df = frame.drop(columns=["unused", "a", "b", "tag", "raw", "ax", "ay", "az"]).copy()
@@ -636,13 +641,15 @@ df.loc[<span class="s">"2026-08-21"</span>]</pre>
           <h2 class="title">연습문제 3</h2>
           <div class="rule"></div>
           <div class="body">
-            <p class="lead">t 는 유닉스 시각(초)이다. 시간 인덱스로 바꾸고 시(hour)별 평균 온도를 구하시오.</p>
+            <p class="lead"><code>t</code> 는 유닉스 시각(초)이다. 이를 datetime 인덱스로 바꾼 뒤, <b>하루 중 시(0~23시)별</b> 평균 온도를 구하시오.</p>
             <div class="cols">
               <pre data-run="" class="code tight">df[["t", "temp"]].head()
 
 <span class="err"># IMPLEMENT HERE</span></pre>
               <div class="run-slot"><div data-run-out=""></div></div>
             </div>
+            <p class="note"><strong>데이터</strong> — 2026-08-21 부터 7분 간격 600개, 약 3일치
+            &nbsp;·&nbsp; <strong>기대 출력</strong> — 인덱스가 0 부터 23 인 값 24개짜리 Series. 원자료에 센티널 -999 가 한 개 남아 있어 3시 평균만 음수로 나온다</p>
           </div>
           <script type="text/x-run-setup">
 df = frame.drop(columns=["unused", "a", "b", "tag", "raw", "ax", "ay", "az"]).copy()
@@ -770,13 +777,15 @@ m = df[[<span class="s">"a"</span>, <span class="s">"b"</span>]].apply(<span cla
           <h2 class="title">연습문제 4</h2>
           <div class="rule"></div>
           <div class="body">
-            <p class="lead">센서별 평균 온도와 표본 수를 구하고, 평균이 가장 높은 센서를 찾으시오.</p>
+            <p class="lead"><code>sensor_id</code> 로 묶어 <b>센서별 평균 온도와 표본 수</b>를 한 표로 구하고, 평균이 가장 높은 센서의 이름을 찾으시오.</p>
             <div class="cols">
               <pre data-run="" class="code tight">df[["sensor_id", "temp"]].head()
 
 <span class="err"># IMPLEMENT HERE</span></pre>
               <div class="run-slot"><div data-run-out=""></div></div>
             </div>
+            <p class="note"><strong>센서</strong> — s01, s02, s03 세 종류
+            &nbsp;·&nbsp; <strong>기대 출력</strong> — 평균과 개수 두 열을 가진 표, 그리고 가장 높은 센서 <code>s01</code> (평균 27.48, 188개)</p>
           </div>
           <script type="text/x-run-setup">
 df = frame.drop(columns=["unused", "a", "b", "tag", "raw", "ax", "ay", "az"]).copy()
@@ -940,7 +949,7 @@ df = df.drop_duplicates("t")
           <h2 class="title">연습문제 5</h2>
           <div class="rule"></div>
           <div class="body">
-            <p class="lead">1분 평균으로 리샘플링한 값과 5샘플 이동평균을 각각 구해 앞 5개를 비교하시오.</p>
+            <p class="lead">시간 인덱스를 가진 df 에서 <code>temp</code> 의 <b>1시간 평균 리샘플링</b> 값과 <b>5샘플 이동평균</b> 값을 각각 구해 앞 5개를 비교하시오.</p>
             <div class="cols">
               <pre data-run="" class="code tight">df.index[:<span class="no">3</span>]
 df["temp"].head()
@@ -948,6 +957,8 @@ df["temp"].head()
 <span class="err"># IMPLEMENT HERE</span></pre>
               <div class="run-slot"><div data-run-out=""></div></div>
             </div>
+            <p class="note"><strong>데이터 간격</strong> — 7분. 리샘플링 주기는 이보다 커야 의미가 있다 (1분으로 하면 대부분 결측이 된다)
+            &nbsp;·&nbsp; <strong>기대 출력</strong> — 리샘플링은 600행이 70행으로 줄고 인덱스가 정각으로 바뀐다. 이동평균은 행 수 그대로, 앞 4개는 창이 덜 차서 결측</p>
           </div>
           <script type="text/x-run-setup">
 df = frame.drop(columns=["unused", "a", "b", "tag", "raw", "ax", "ay", "az"]).copy()

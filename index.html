@@ -2,7 +2,7 @@
 <html lang="ko"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>파이썬 데이터 분석 기초 - 강의 슬라이드</title>
+<title>AI를 위한 Python - 강의 슬라이드</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%231d4ed8%27/%3E%3Ctext x=%2716%27 y=%2723%27 font-size=%2720%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27sans-serif%27 font-weight=%27bold%27%3EP%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,18 +58,69 @@ kbd {
   background: #fff; border: 1px solid var(--outline); border-bottom-width: 2px;
   border-radius: 6px; padding: 2px 7px;
 }
+.masthead {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 28px; flex-wrap: wrap; margin-bottom: 8px;
+}
+.masthead-logos { display: flex; align-items: center; gap: 22px; padding-top: 4px; }
+.masthead-logos img { height: 54px; width: auto; display: block; }
+.badge {
+  display: inline-block; font-family: var(--font-display); font-weight: 800;
+  font-size: 13px; letter-spacing: 0.08em;
+  color: var(--sky-deep); background: var(--sky-soft);
+  border-radius: 999px; padding: 7px 16px;
+}
+.course { font-family: var(--font-display); font-weight: 700; color: var(--ink-muted); font-size: 15px; margin: 14px 0 0; }
+@media (max-width: 620px) { .masthead-logos img { height: 36px; } }
 footer { margin-top: 64px; color: var(--ink-subtle); font-size: 14px; border-top: 1px solid var(--outline); padding-top: 20px; }
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="masthead">
+    <div>
+      <span class="badge">K-뉴딜 아카데미</span>
+      <p class="course">충북대학교 지능로봇공학과</p>
+    </div>
+    <div class="masthead-logos">
+      <img src="./cbnu_logo.png" alt="충북대학교">
+      <img src="./suvlab_logo.png" alt="SUV Lab">
+    </div>
+  </div>
+
   <p class="kicker">LECTURE SLIDES</p>
-  <h1>파이썬 데이터 분석 기초</h1>
+  <h1>AI를 위한 Python</h1>
   <div class="rule"></div>
-  <p class="sub">모듈과 패키지, 그리고 Matplotlib · NumPy · Pandas. 슬라이드의 코드는 브라우저에서 바로 실행된다.</p>
+  <p class="sub">K-뉴딜 아카데미 교육과정의 일환으로 진행되는 <b>AI를 위한 Python</b> 강의 자료다.<br>
+  모듈과 패키지, Matplotlib · NumPy · Pandas, 그리고 ROS2 · PX4 센서 로그 실습까지 8시간 과정이다.
+  슬라이드의 코드는 브라우저에서 바로 실행된다.</p>
+
+  <h2>과정 정보</h2>
+  <div class="deck-list">
+    <div class="deck">
+      <div class="deck-main">
+        <p class="deck-title">AI를 위한 Python</p>
+        <p class="deck-meta">
+          사업명 K-뉴딜 아카데미 &nbsp;·&nbsp; 총 8시간 (오전 3시간, 오후 5시간) &nbsp;·&nbsp;
+          강의 충북대학교 지능로봇공학과 문성태 교수 &nbsp;·&nbsp; 슬라이드 7종 + 실습 자료
+        </p>
+      </div>
+    </div>
+  </div>
 
   <h2>강의 슬라이드</h2>
   <div class="deck-list">
+    <div class="deck">
+      <span class="deck-no">Part 0</span>
+      <div class="deck-main">
+        <p class="deck-title">소개</p>
+        <p class="deck-meta">강의자 소개, 수업 스케쥴, 자료 사용법 · 10분</p>
+      </div>
+      <div class="deck-links">
+        <a class="btn" href="./part0-intro/">열기</a>
+        <a class="btn ghost" href="./part0-intro/slides.pdf">PDF</a>
+      </div>
+    </div>
     <div class="deck">
       <span class="deck-no">Part 1-1</span>
       <div class="deck-main">
@@ -125,7 +176,37 @@ footer { margin-top: 64px; color: var(--ink-subtle); font-size: 14px; border-top
         <a class="btn ghost" href="./part2-3-pandas/slides.pdf">PDF</a>
       </div>
     </div>
+    <div class="deck">
+      <span class="deck-no">Part 2-4</span>
+      <div class="deck-main">
+        <p class="deck-title">센서 로그 실습</p>
+        <p class="deck-meta">ROS2 mcap 과 PX4 ulog 배경 설명과 과제 안내 · 2시간</p>
+      </div>
+      <div class="deck-links">
+        <a class="btn" href="./part2-4-sensor-log/">열기</a>
+        <a class="btn ghost" href="./part2-4-sensor-log/slides.pdf">PDF</a>
+      </div>
+    </div>
   </div>
+
+  <!-- PART24-START -->
+  <h2>실습 데이터</h2>
+  <div class="deck-list">
+    <div class="deck">
+      <span class="deck-no">Part 2-4</span>
+      <div class="deck-main">
+        <p class="deck-title">센서 데이터 로그 분석 및 가공</p>
+        <p class="deck-meta">ROS2 mcap 과 PX4 ulog 샘플 로그, Colab 문제 노트북 · 2시간</p>
+      </div>
+      <div class="deck-links">
+        <a class="btn" href="./part2-4-data/part2-4-lab.ipynb">노트북</a>
+        <a class="btn ghost" href="./part2-4-data/flight.mcap">flight.mcap</a>
+        <a class="btn ghost" href="./part2-4-data/flight.ulg">flight.ulg</a>
+        <a class="btn ghost" href="./part2-4-data/loaders.py">loaders.py</a>
+      </div>
+    </div>
+  </div>
+  <!-- PART24-END -->
 
   <h2>보는 방법</h2>
   <div class="tips">
@@ -138,6 +219,6 @@ footer { margin-top: 64px; color: var(--ink-subtle); font-size: 14px; border-top
     </ul>
   </div>
 
-  <footer>강의 슬라이드 전용 페이지. 실습 자료와 답안은 포함하지 않는다.</footer>
+  <footer>K-뉴딜 아카데미 · 충북대학교 지능로봇공학과 문성태 교수 &nbsp;·&nbsp; 강의 슬라이드 전용 페이지, 답안은 포함하지 않는다.</footer>
 </div>
 </body></html>

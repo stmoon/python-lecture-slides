@@ -71,12 +71,14 @@ deck-stage { display: block; }
 <link rel="stylesheet" href="cde-layout.css"></head>
 <body>
 <deck-stage>
-        <section class="slide cover" data-label="Cover" data-screen-label="Cover">
-          <span class="course">Python Programming</span>
-          <span class="kicker">Part 1-1 · Basic Concept</span>
-          <h1 class="display">모듈과 패키지</h1>
-          <div class="sun-rule"></div>
-          <p class="presenter">충북대학교 지능로봇공학과 문성태 교수</p>
+        <section class="slide cover" data-label="표지" data-screen-label="표지">
+          <img class="cover-logo" src="./cbnu_logo.png" alt="충북대학교">
+          <span class="cover-kicker">K-뉴딜 아카데미 · AI를 위한 PYTHON · PART 1-1</span>
+          <h1 class="cover-title">모듈과 패키지</h1>
+          <p class="cover-sub">모듈, 패키지, 라이브러리의 구분과 import 규칙</p>
+          <div class="cover-rule"></div>
+          <p class="cover-by">충북대학교 지능로봇공학과 <b>문성태 교수</b></p>
+          <p class="cover-host">본 교육은 <b>K-뉴딜 아카데미</b> 교육과정의 일환으로 진행된다</p>
         </section>
 
         <section class="slide" data-label="01 Contents" data-screen-label="01 Contents">
@@ -85,7 +87,7 @@ deck-stage { display: block; }
           <div class="rule"></div>
           <div class="body" data-cde-layout="text" style="--cde-cols: 1;"><div class="cde-text"><div class="grid4">
               <div class="card soft">
-                <h3 class="card-h sky">모듈 · 02-12</h3>
+                <h3 class="card-h sky">모듈</h3>
                 <ul class="ul">
                   <li><strong>구분</strong> — 모듈, 패키지, 라이브러리</li>
                   <li><strong>import</strong> — 형태별 차이, 별표 금지</li>
@@ -93,7 +95,7 @@ deck-stage { display: block; }
                 </ul>
               </div>
               <div class="card">
-                <h3 class="card-h">패키지 · 13-17</h3>
+                <h3 class="card-h">패키지</h3>
                 <ul class="ul">
                   <li><strong>구조</strong> — 디렉터리로 모듈 묶기</li>
                   <li><strong>__init__.py</strong> — 공개 이름 정하기</li>
@@ -101,7 +103,7 @@ deck-stage { display: block; }
                 </ul>
               </div>
               <div class="card">
-                <h3 class="card-h">환경 · 18-20</h3>
+                <h3 class="card-h">환경</h3>
                 <ul class="ul">
                   <li><strong>표준 라이브러리</strong> — 설치 없이 쓰는 범위</li>
                   <li><strong>pip</strong> — PyPI 에서 외부 패키지 설치</li>
@@ -109,7 +111,7 @@ deck-stage { display: block; }
                 </ul>
               </div>
               <div class="card good">
-                <h3 class="card-h leaf">정리 · 21-22</h3>
+                <h3 class="card-h leaf">정리</h3>
                 <ul class="ul leaf">
                   <li><strong>용어</strong> — 모듈, 패키지, 라이브러리 구분</li>
                   <li><strong>핵심</strong> — 실무에서 지킬 규칙 다섯</li>
@@ -160,7 +162,7 @@ deck-stage { display: block; }
               </div></div>
             </div>
             <p class="note"><strong>나누는 단위 = 모듈</strong> — 문법이 아니라 파일과 디렉터리로 표현</p>
-          </div>
+          
           <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:14%"></i></div><span class="foot-num">03 / 22</span></footer>
         </section>
 
@@ -268,12 +270,12 @@ deck-stage { display: block; }
           <div class="rule"></div>
           <div class="body">
             <div class="cols">
-              <pre data-run class="code on-soft xs"><span class="k">from</span> math <span class="k">import</span> *
+              <pre data-run="" class="code on-soft xs"><span class="k">from</span> math <span class="k">import</span> *
 <span class="k">from</span> numpy <span class="k">import</span> *
 
 sqrt(-<span class="no">1</span>)
 <span class="c"># numpy 의 sqrt 가 승리: nan</span></pre>
-              <pre data-run class="code on-soft xs"><span class="k">import</span> math
+              <pre data-run="" class="code on-soft xs"><span class="k">import</span> math
 <span class="k">import</span> numpy <span class="k">as</span> np
 
 np.sqrt(-<span class="no">1</span>)    <span class="c"># nan</span>
@@ -582,11 +584,12 @@ pandas&gt;=<span class="no">2.0</span>,&lt;<span class="no">3.0</span></pre></di
                   <li><strong>격리</strong> — 프로젝트마다 .venv 하나</li>
                 </ul>
               </div>
-            </div><p class="lead sm">다음 — Part 1-2 패키지 만들기: src 레이아웃, pyproject.toml, pip install -e .</p></div><div class="cde-media" style="--cde-cols: 1;"></div></div>
+            </div></div><div class="cde-media" style="--cde-cols: 1;"></div></div>
           <footer class="foot"><span class="foot-sec">Part 1-1 모듈과 패키지</span><div class="bar"><i style="width:100%"></i></div><span class="foot-num">22 / 22</span></footer>
         </section>
       
 </deck-stage>
+
 
 
 

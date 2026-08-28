@@ -124,6 +124,13 @@ pre.xs { font-size: 25px; padding: 22px 26px; }
 .pr { color: var(--sky); font-weight: 700; }
 .err { color: #b91c1c; }
 
+/* Inline code inside prose (leads, notes). Blocks use pre.code. */
+code {
+  font-family: var(--font-mono); font-size: 0.9em; letter-spacing: 0;
+  font-variant-ligatures: none;
+  background: var(--sunken); border-radius: 8px; padding: 2px 10px;
+}
+
 .chips { display: flex; flex-wrap: wrap; gap: 16px; }
 .chip { font-family: var(--font-mono); font-size: 26px; font-weight: 500; padding: 12px 24px; border-radius: 999px; background: var(--sky-soft); color: var(--sky-deep); font-variant-ligatures: none; }
 .chip.sun { background: #fef3c7; color: var(--sun-deep); }
@@ -151,6 +158,8 @@ pre.xs { font-size: 25px; padding: 22px 26px; }
 .cover-rule { width: 132px; height: 10px; border-radius: 999px; background: var(--sun); margin-top: 44px; }
 .cover-by { font-size: 40px; color: var(--ink-muted); margin: 40px 0 0; }
 .cover-by b { color: var(--ink); font-weight: 700; }
+.cover-host { font-size: 28px; color: var(--ink-muted); margin: 20px 0 0; }
+.cover-host b { color: var(--sky-deep); font-weight: 700; }
 
 /* --- formulas ----------------------------------------------------------- */
 

@@ -179,11 +179,12 @@ deck-stage { display: block; }
 <deck-stage>
         <section class="slide cover" data-label="표지" data-screen-label="표지">
           <img class="cover-logo" src="./cbnu_logo.png" alt="충북대학교">
-          <span class="cover-kicker">PYTHON 프로그래밍 · PART 1-2</span>
+          <span class="cover-kicker">K-뉴딜 아카데미 · AI를 위한 PYTHON · PART 1-2</span>
           <h1 class="cover-title">모듈과 패키지 만들기</h1>
           <p class="cover-sub">패키지 구조부터 설치와 배포까지</p>
           <div class="cover-rule"></div>
           <p class="cover-by">충북대학교 지능로봇공학과 <b>문성태 교수</b></p>
+          <p class="cover-host">본 교육은 <b>K-뉴딜 아카데미</b> 교육과정의 일환으로 진행된다</p>
         </section>
 
         <section class="slide" data-label="01 목표" data-screen-label="01 목표">
@@ -429,9 +430,8 @@ moving_average([<span class="no">1</span>, <span class="no">2</span>, <span clas
           <h2 class="title">연습문제 1</h2>
           <div class="rule"></div>
           <div class="body">
-            <p class="lead">report.py 의 __all__ 을 작성해 별표 import 로 summarize 만 공개되게 하시오.</p>
+            <p class="lead">sensorkit.report 에서 <code>from ... import *</code> 로 <b>summarize 하나만</b> 공개되도록 <code>__all__</code> 을 정의하시오.</p>
             <div class="cols">
-              <div class="fig-stack">
                 <pre class="code xs"><span class="c"># src/sensorkit/report.py</span>
 <span class="k">import</span> csv
 <span class="k">from</span> .stats <span class="k">import</span> mean
@@ -443,9 +443,10 @@ DIGITS = <span class="no">2</span>
 <span class="c"># IMPLEMENT HERE</span>
 
 check_star(report, __all__)</pre>
-              </div>
-              <div class="run-slot" style="min-height:260px"><div data-run-out></div></div>
             </div>
+            <p class="note"><strong>주어진 것</strong> — report 모듈이 갖는 이름은 <code>csv</code>, <code>mean</code>, <code>DIGITS</code>, <code>summarize</code>, <code>_round</code> 다섯이다.
+            <code>check_star</code> 는 넘긴 <code>__all__</code> 로 별표 import 를 실행해 실제 공개된 이름을 검사한다
+            &nbsp;·&nbsp; <strong>기대 출력</strong> — <code>OK: 공개 ['summarize']</code></p>
           </div>
           <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:42%"></i></div><span class="foot-num">08 / 19</span></footer>
         </section>
@@ -549,13 +550,23 @@ config.G_M_PER_S2, config.TEMP_RANGE_C</pre>
           <h2 class="title">연습문제 2</h2>
           <div class="rule"></div>
           <div class="body">
-            <p class="lead">moving_average 를 세 가지 경로로 가져오시오. 패키지 최상위, 서브패키지, 모듈 각각에서 a, b, c 에 담는다. 셋이 같은 객체이면 True.</p>
+            <p class="lead">아래 sensorkit 패키지의 <code>moving_average</code> 함수를 <b>서로 다른 세 경로</b>로 import 해 a, b, c 에 담으시오.</p>
             <div class="cols">
-              <pre data-run class="code xs"><span class="c"># IMPLEMENT HERE</span>
+              <pre class="code xs"><span class="c"># 준비된 패키지 (src/ 는 sys.path 에 있다)</span>
+sensorkit/
+├── __init__.py       <span class="c"># 함수 재노출</span>
+└── filters/
+    ├── __init__.py   <span class="c"># 함수 재노출</span>
+    └── moving_average.py
+        <span class="k">def</span> <span class="fn">moving_average</span>(xs, n=<span class="no">3</span>)</pre>
+              <pre data-run class="code xs"><span class="c"># a: 패키지 최상위 sensorkit</span>
+<span class="c"># b: 서브패키지 sensorkit.filters</span>
+<span class="c"># c: 모듈 ...filters.moving_average</span>
+<span class="c"># IMPLEMENT HERE</span>
 
 a is b is c</pre>
-              <div class="run-slot" style="min-height:260px"><div data-run-out></div></div>
             </div>
+            <p class="note"><strong>기대 출력</strong> — <code>True</code>. 세 경로가 모두 같은 함수 객체를 가리키면 참이 된다</p>
           </div>
           <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:63%"></i></div><span class="foot-num">12 / 19</span></footer>
         </section>
@@ -663,7 +674,7 @@ sensorkit = <span class="s">"sensorkit.cli:main"</span></pre>
           <h2 class="title">연습문제 3</h2>
           <div class="rule"></div>
           <div class="body">
-            <p class="lead">cli.py 의 main 을 작성하시오. argv 의 첫 인자를 경로로 받아 temp 열의 평균을 출력하고 종료 코드 0 을 돌려준다. 마지막 줄이 0 이면 규약을 지킨 것이다.</p>
+            <p class="lead">CLI 진입점 <code>main</code> 을 완성하시오. <code>argv[0]</code> 을 CSV 경로로 받아 <code>temp</code> 열의 평균을 <code>log.csv: mean=37.22</code> 형식으로 출력하고, 종료 코드 <code>0</code> 을 반환한다.</p>
             <div class="cols">
               <pre data-run class="code xs"><span class="k">import</span> sensorkit <span class="k">as</span> sk
 
@@ -675,6 +686,9 @@ sensorkit = <span class="s">"sensorkit.cli:main"</span></pre>
 main([<span class="s">"log.csv"</span>])</pre>
               <div class="run-slot" style="min-height:260px"><div data-run-out></div></div>
             </div>
+            <p class="note"><strong>쓸 수 있는 함수</strong> — <code>sk.load_csv(path)</code> 행 목록, <code>sk.column(rows, "temp")</code> 실수 목록, <code>sk.mean(xs)</code> 평균
+            &nbsp;·&nbsp; <strong>log.csv 의 temp</strong> — 21.5, 21.6, 99.9, 21.4, 21.7
+            &nbsp;·&nbsp; <strong>기대 출력</strong> — <code>log.csv: mean=37.22</code> 와 <code>0</code> 두 줄</p>
           </div>
           <footer class="foot"><span class="foot-sec">Part 1-2 모듈과 패키지 만들기</span><div class="bar"><i style="width:84%"></i></div><span class="foot-num">16 / 19</span></footer>
         </section>
