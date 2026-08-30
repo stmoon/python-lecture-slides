@@ -158,8 +158,6 @@ code {
 .cover-rule { width: 132px; height: 10px; border-radius: 999px; background: var(--sun); margin-top: 44px; }
 .cover-by { font-size: 40px; color: var(--ink-muted); margin: 40px 0 0; }
 .cover-by b { color: var(--ink); font-weight: 700; }
-.cover-host { font-size: 28px; color: var(--ink-muted); margin: 20px 0 0; }
-.cover-host b { color: var(--sky-deep); font-weight: 700; }
 
 /* --- formulas ----------------------------------------------------------- */
 

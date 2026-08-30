@@ -33,7 +33,6 @@ deck-stage { display: block; }
           <p class="cover-sub">다차원 배열 연산 및 행렬 제어</p>
           <div class="cover-rule"></div>
           <p class="cover-by">충북대학교 지능로봇공학과 <b>문성태 교수</b></p>
-          <p class="cover-host">본 교육은 <b>K-뉴딜 아카데미</b> 교육과정의 일환으로 진행된다</p>
         </section>
 
         <section class="slide" data-label="01 NumPy 소개" data-screen-label="01 NumPy 소개">
@@ -81,15 +80,13 @@ deck-stage { display: block; }
               <div class="card warn">
                 <h3 class="card-h coral">파이썬 리스트</h3>
                 <pre data-run="" class="code on-soft tight">a = [<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>]
-a * <span class="no">2
-</span><span class="c"># [1, 2, 3, 1, 2, 3]</span></pre>
+a * <span class="no">2</span></pre>
                 <p class="note">원소마다 파이썬 객체라 메모리가 크고, 계산은 for 루프로 돌아야 한다.</p>
               </div>
               <div class="card good">
                 <h3 class="card-h leaf">NumPy 배열</h3>
                 <pre data-run="" class="code on-soft tight">a = np.array([<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>])
-a * <span class="no">2
-</span><span class="c"># array([2, 4, 6])</span></pre>
+a * <span class="no">2</span></pre>
                 <p class="note">같은 타입을 연속된 메모리에 두고, C로 구현된 연산이 <br>배열 전체에 한번에 적용된다.</p>
               </div>
             </div>
@@ -142,9 +139,9 @@ s = t(); arr.sum(); nu = t() - s
               <pre data-run="" class="code tight">a = np.array([[<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>],
               [<span class="no">4</span>, <span class="no">5</span>, <span class="no">6</span>]])
 
-a.shape   <span class="c"># (2, 3)
-</span>a.dtype   <span class="c"># int64
-</span>a.ndim    <span class="c"># 2</span></pre>
+a.shape
+a.dtype
+a.ndim</pre>
             </div>
             <p class="note">센서 로그로 치면 <b>행은 시간, 열은 채널</b>이 된다. (샘플 수, 3축)</p>
           </div>
@@ -164,10 +161,7 @@ np.full((<span class="no">2</span>, <span class="no">2</span>), <span class="no"
 np.eye(<span class="no">3</span>)          <span class="c"># 단위행렬
 </span>np.empty((<span class="no">2</span>, <span class="no">2</span>))  <span class="c"># 초기화 안 함</span></pre>
               <pre data-run="" class="code tight">np.arange(<span class="no">0</span>, <span class="no">10</span>, <span class="no">2</span>)
-<span class="c"># [0 2 4 6 8]
-
-</span>np.linspace(<span class="no">0</span>, <span class="no">1</span>, <span class="no">5</span>)
-<span class="c"># [0.   0.25 0.5  0.75 1.  ]</span></pre>
+np.linspace(<span class="no">0</span>, <span class="no">1</span>, <span class="no">5</span>)</pre>
             </div>
             <div class="cols">
               <ul class="ul">
@@ -240,12 +234,12 @@ u = rng.uniform(<span class="no">0</span>, <span class="no">1</span>, <span clas
             <div class="cols">
               <pre data-run="" class="code tight">a = np.zeros((<span class="no">2</span>, <span class="no">3</span>), dtype=np.float32)
 
-a.shape     <span class="c"># (2, 3)
-</span>a.ndim      <span class="c"># 2
-</span>a.size      <span class="c"># 6
-</span>a.dtype     <span class="c"># float32
-</span>a.itemsize  <span class="c"># 4 바이트
-</span>a.nbytes    <span class="c"># 24 바이트</span></pre>
+a.shape
+a.ndim
+a.size
+a.dtype
+a.itemsize
+a.nbytes</pre>
               <div class="card">
                 <h3 class="card-h sky">디버깅 첫 줄</h3>
                 <p class="note">배열 코드가 이상하면 먼저 <b>shape과 dtype을 찍어본다.</b> 오류의 절반은 이 둘 중 하나다.</p>
@@ -320,15 +314,13 @@ a = np.array([125, 126, 127], dtype=np.int8)
           <div class="body">
             <div class="cols">
               <pre data-run="" class="code tight">a = np.arange(<span class="no">12</span>).reshape(<span class="no">3</span>, <span class="no">4</span>)
-<span class="c"># [[ 0  1  2  3]
-#  [ 4  5  6  7]
-#  [ 8  9 10 11]]
+a
 
-</span>a[<span class="no">0</span>, <span class="no">2</span>]      <span class="c"># 2
-</span>a[<span class="no">1</span>]         <span class="c"># [4 5 6 7]
-</span>a[:, <span class="no">1</span>]      <span class="c"># [1 5 9]
-</span>a[<span class="no">0</span>:<span class="no">2</span>, <span class="no">1</span>:<span class="no">3</span>]  <span class="c"># [[1 2] [5 6]]
-</span>a[-<span class="no">1</span>, -<span class="no">1</span>]    <span class="c"># 11</span></pre>
+a[<span class="no">0</span>, <span class="no">2</span>]
+a[<span class="no">1</span>]
+a[:, <span class="no">1</span>]
+a[<span class="no">0</span>:<span class="no">2</span>, <span class="no">1</span>:<span class="no">3</span>]
+a[-<span class="no">1</span>, -<span class="no">1</span>]</pre>
               <ul class="ul">
                 <li>콤마로 축을 구분한다</li>
                 <li>리스트의 a[0][2] 와 달리 한 번에 접근한다</li>
@@ -352,7 +344,7 @@ a = np.array([125, 126, 127], dtype=np.int8)
 b = a[<span class="no">1</span>:<span class="no">4</span>]
 b[<span class="no">0</span>] = <span class="no">99</span>
 
-a  <span class="err"># [ 0 99  2  3  4]</span></pre>
+a</pre>
                 <p class="note">b를 고쳤는데 <b>a가 변경된다.</b> 메모리를 공유하기 때문이다.</p>
               </div>
               <div class="card good">
@@ -361,7 +353,7 @@ a  <span class="err"># [ 0 99  2  3  4]</span></pre>
 c = a[<span class="no">1</span>:<span class="no">4</span>].copy()
 c[<span class="no">0</span>] = <span class="no">99</span>
 
-a  <span class="c"># [0 1 2 3 4]</span></pre>
+a</pre>
                 <p class="note">원본을 지켜야 한다면 반드시 <b>copy()</b>를 명시한다.</p>
               </div>
             </div>
@@ -442,16 +434,14 @@ m[[<span class="no">0</span>, <span class="no">2</span>], [<span class="no">1</s
               <pre data-run="" class="code tight">temp = np.array([<span class="no">21.5</span>, <span class="no">88.0</span>, <span class="no">22.1</span>, -<span class="no">40.0</span>])
 
 mask = (temp &gt; -<span class="no">20</span>) &amp; (temp &lt; <span class="no">60</span>)
-<span class="c"># [True False True False]
+mask
 
-</span>temp[mask]     <span class="c"># [21.5 22.1]
-</span>mask.sum()     <span class="c"># 2  조건 만족 개수
-</span>(~mask).sum()  <span class="c"># 2  이상치 개수</span></pre>
+temp[mask]
+mask.sum()     <span class="c"># 조건 만족 개수
+</span>(~mask).sum()  <span class="c"># 이상치 개수</span></pre>
               <div class="card warn">
                 <h3 class="card-h coral">and / or 는 안 된다</h3>
-                <pre data-run="" class="code on-soft tight">temp &gt; -<span class="no">20</span> <span class="k">and </span>temp &lt; <span class="no">60
-</span><span class="err"># ValueError: truth value
-# of an array is ambiguous</span></pre>
+                <pre data-run="" class="code on-soft tight">temp &gt; -<span class="no">20</span> <span class="k">and </span>temp &lt; <span class="no">60</span></pre>
                 <p class="note"><b>&amp; | ~</b> 를 쓰고 각 조건을 <b>괄호</b>로 묶는다. 연산자 우선순위 때문에 괄호가 필수다.</p>
               </div>
             </div>
@@ -496,13 +486,13 @@ place = np.array(list("ABCDEFGHIJKL"))
               <pre data-run="" class="code tight">a = np.array([-<span class="no">3</span>, <span class="no">5</span>, -<span class="no">1</span>, <span class="no">9</span>])
 
 np.where(a &lt; <span class="no">0</span>, <span class="no">0</span>, a)
-<span class="c"># [0 5 0 9]  음수를 0으로
+<span class="c"># 음수를 0으로
 
 </span>np.clip(a, <span class="no">0</span>, <span class="no">6</span>)
-<span class="c"># [0 5 0 6]  범위 밖을 잘라낸다
+<span class="c"># 범위 밖을 잘라낸다
 
 </span>np.where(a &lt; <span class="no">0</span>)
-<span class="c"># (array([0, 2]),)  인덱스</span></pre>
+<span class="c"># 조건을 만족하는 인덱스</span></pre>
               <ul class="ul">
                 <li><b>where(조건, 참일 때, 거짓일 때)</b> 세 인자 형태</li>
                 <li>인자가 하나면 조건을 만족하는 인덱스를 돌려준다</li>
@@ -528,7 +518,7 @@ a.reshape(<span class="no">3</span>, -<span class="no">1</span>)   <span class="
 </span>b = a.reshape(<span class="no">3</span>, <span class="no">4</span>)
 b.ravel()     <span class="c"># 1차원 뷰
 </span>b.flatten()   <span class="c"># 1차원 복사
-</span>b.T           <span class="c"># 전치 (4, 3)</span></pre>
+</span>b.T           <span class="c"># 전치</span></pre>
               <ul class="ul">
                 <li>reshape는 원소 개수가 맞아야 한다</li>
                 <li>-1은 나머지 하나를 알아서 정하라는 뜻</li>
@@ -574,16 +564,14 @@ wave = _img.reshape(-1)
           <div class="rule"></div>
           <div class="body">
             <div class="cols">
-              <pre data-run="" class="code tight">a = np.array([<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>])   <span class="c"># (3,)
+              <pre data-run="" class="code tight">a = np.array([<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>])
 
-</span>a[:, np.newaxis]   <span class="c"># (3, 1) 열벡터
-</span>a[np.newaxis, :]   <span class="c"># (1, 3) 행벡터
+a[:, np.newaxis]   <span class="c"># 열벡터
+</span>a[np.newaxis, :]   <span class="c"># 행벡터
 
 </span>np.expand_dims(a, axis=<span class="no">0</span>)
-<span class="c"># (1, 3)
-
-</span>np.squeeze(np.zeros((<span class="no">1</span>, <span class="no">3</span>, <span class="no">1</span>)))
-<span class="c"># (3,)  크기 1인 축 제거</span></pre>
+np.squeeze(np.zeros((<span class="no">1</span>, <span class="no">3</span>, <span class="no">1</span>)))
+<span class="c"># 크기 1인 축 제거</span></pre>
               <ul class="ul">
                 <li>브로드캐스팅 모양을 맞추려고 축을 늘린다</li>
                 <li>None 은 np.newaxis 와 같다</li>
@@ -604,18 +592,15 @@ wave = _img.reshape(-1)
               <pre data-run="" class="code tight">a = np.array([[<span class="no">1</span>, <span class="no">2</span>]])
 b = np.array([[<span class="no">3</span>, <span class="no">4</span>]])
 
-np.vstack([a, b])  <span class="c"># (2, 2) 세로
-</span>np.hstack([a, b])  <span class="c"># (1, 4) 가로
+np.vstack([a, b])  <span class="c"># 세로로 쌓기
+</span>np.hstack([a, b])  <span class="c"># 가로로 잇기
 
 </span>np.concatenate([a, b], axis=<span class="no">0</span>)
 <span class="c"># 축을 명시하는 일반형</span></pre>
               <pre data-run="" class="code tight">x = np.arange(<span class="no">6</span>)
 
 np.split(x, <span class="no">3</span>)
-<span class="c"># [array([0,1]), array([2,3]),
-#  array([4,5])]
-
-</span>np.array_split(x, <span class="no">4</span>)
+np.array_split(x, <span class="no">4</span>)
 <span class="c"># 나누어 떨어져도 된다</span></pre>
             </div>
             <p class="note">결합(vstack, hstack, concatenate)은 <b>새 메모리를 할당</b>한다.<br>루프 안에서 반복해 붙이면 느리다. 리스트에 모은 뒤 마지막에 한 번만 concatenate 한다.</p>
@@ -632,10 +617,10 @@ np.split(x, <span class="no">3</span>)
               <pre data-run="" class="code tight">a = np.array([<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>])
 b = np.array([<span class="no">10</span>, <span class="no">20</span>, <span class="no">30</span>])
 
-a + b     <span class="c"># [11 22 33]
-</span>a * b     <span class="c"># [10 40 90]
-</span>b / a     <span class="c"># [10. 10. 10.]
-</span>a ** <span class="no">2</span>    <span class="c"># [1 4 9]</span></pre>
+a + b
+a * b
+b / a
+a ** <span class="no">2</span></pre>
               <figure class="fig plain" style="max-width:560px">
                 <img src="./imgs/np-broadcast-scalar.svg" alt="스칼라 브로드캐스팅">
                 <figcaption>스칼라 2가 배열 크기만큼 늘어나 곱해진다.</figcaption>
@@ -714,12 +699,12 @@ b = np.array([10, 20, 30, 40])
             <div class="cols">
               <pre data-run="" class="code tight">data = rng.normal(size=(<span class="no">100</span>, <span class="no">3</span>))
 
-col_mean = data.mean(axis=<span class="no">0</span>)  <span class="c"># (3,)
-</span>col_std  = data.std(axis=<span class="no">0</span>)   <span class="c"># (3,)
+col_mean = data.mean(axis=<span class="no">0</span>)  <span class="c"># 열별 평균
+</span>col_std  = data.std(axis=<span class="no">0</span>)   <span class="c"># 열별 표준편차
 
 </span>centered = data - col_mean
 normed = (data - col_mean) / col_std
-<span class="c"># 둘 다 (100, 3)</span></pre>
+<span class="c"># 둘 다 원본과 같은 모양</span></pre>
               <figure class="fig plain" style="max-width:560px">
                 <img src="./imgs/np-broadcast-outer.svg" alt="양쪽이 늘어나는 브로드캐스팅">
                 <figcaption>(4,1) + (3,) — 양쪽이 다 늘어나 입력보다 큰 (4,3)이 된다.</figcaption>
@@ -777,12 +762,12 @@ v = np.array([10, 20, 30, 40])
               <pre data-run="" class="code tight">a = np.array([[<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>],
               [<span class="no">4</span>, <span class="no">5</span>, <span class="no">6</span>]])
 
-a.sum()      <span class="c"># 21
-</span>a.mean()     <span class="c"># 3.5
-</span>a.min()      <span class="c"># 1
-</span>a.max()      <span class="c"># 6
-</span>a.std()      <span class="c"># 1.707...
-</span>a.argmax()   <span class="c"># 5  평탄화 기준 위치</span></pre>
+a.sum()
+a.mean()
+a.min()
+a.max()
+a.std()
+a.argmax()   <span class="c"># 평탄화 기준 위치</span></pre>
               <div class="grid8">
                 <div class="std"><span class="std-n">sum</span><span class="std-d">합계</span></div>
                 <div class="std"><span class="std-n">mean</span><span class="std-d">평균</span></div>
@@ -805,13 +790,13 @@ a.sum()      <span class="c"># 21
             <p class="lead">axis는 <b>사라지는 축</b>이다.</p>
             <div class="cols">
               <pre data-run="" class="code tight">a = np.array([[<span class="no">1</span>, <span class="no">2</span>, <span class="no">3</span>],
-              [<span class="no">4</span>, <span class="no">5</span>, <span class="no">6</span>]])   <span class="c"># (2, 3)
+              [<span class="no">4</span>, <span class="no">5</span>, <span class="no">6</span>]])
 
-</span>a.sum(axis=<span class="no">0</span>)   <span class="c"># [5 7 9]   shape (3,)
-</span>a.sum(axis=<span class="no">1</span>)   <span class="c"># [6 15]    shape (2,)
+a.sum(axis=<span class="no">0</span>)   <span class="c"># 열 방향 합
+</span>a.sum(axis=<span class="no">1</span>)   <span class="c"># 행 방향 합
 
 </span>a.sum(axis=<span class="no">0</span>, keepdims=<span class="k">True</span>)
-<span class="c"># [[5 7 9]]  shape (1, 3)</span></pre>
+<span class="c"># 줄어든 축을 남긴다</span></pre>
               <ul class="ul">
                 <li>axis=0은 행을 따라 접어 <b>열별 결과</b></li>
                 <li>axis=1은 열을 따라 접어 <b>행별 결과</b></li>
@@ -831,13 +816,13 @@ a.sum()      <span class="c"># 21
             <div class="cols">
               <pre data-run="" class="code tight">a = np.array([<span class="no">1.0</span>, np.nan, <span class="no">3.0</span>])
 
-a.mean()        <span class="c"># nan  오염된다
-</span>np.nanmean(a)   <span class="c"># 2.0
+a.mean()        <span class="c"># nan 하나가 전체를 오염시킨다
+</span>np.nanmean(a)
 
-</span>np.isnan(a)     <span class="c"># [False True False]
-</span>a[np.isnan(a)] = <span class="no">0.0</span>
+np.isnan(a)
+a[np.isnan(a)] = <span class="no">0.0</span>
 
-np.nan == np.nan  <span class="c"># False</span></pre>
+np.nan == np.nan</pre>
               <div class="card warn">
                 <h3 class="card-h coral">nan의 성질</h3>
                 <ul class="ul coral">
@@ -860,22 +845,24 @@ np.nan == np.nan  <span class="c"># False</span></pre>
             <div class="cols">
               <pre data-run="" class="code tight">a = np.array([<span class="no">3</span>, <span class="no">1</span>, <span class="no">2</span>])
 
-np.sort(a)      <span class="c"># [1 2 3]  복사본
+np.sort(a)      <span class="c"># 복사본
 </span>a.sort()        <span class="c"># 제자리 정렬
 </span>np.argsort(a)   <span class="c"># 정렬 순서 인덱스</span></pre>
-              <pre data-run="" class="code tight">np.unique([<span class="no">1</span>, <span class="no">1</span>, <span class="no">2</span>])   <span class="c"># [1 2]
+              <pre data-run="" class="code tight">np.unique([<span class="no">1</span>, <span class="no">1</span>, <span class="no">2</span>])
 
-</span>np.searchsorted([<span class="no">1</span>, <span class="no">3</span>, <span class="no">5</span>], <span class="no">4</span>)
-<span class="c"># 2  정렬 상태를 유지할 위치</span></pre>
+np.searchsorted([<span class="no">1</span>, <span class="no">3</span>, <span class="no">5</span>], <span class="no">4</span>)
+np.searchsorted([<span class="no">1</span>, <span class="no">3</span>, <span class="no">5</span>], [<span class="no">0</span>, <span class="no">2</span>, <span class="no">6</span>])</pre>
             </div>
             <div class="cols">
               <ul class="ul">
                 <li><b>np.sort</b>는 복사본, <b>a.sort()</b>는 원본을 바꿈</li>
+                <li>argsort는 정렬 순서 인덱스, 다른 배열을 같은 순서로 재배열할 때 사용</li>
                 <li>2차원에서는 axis를 지정해 행별/열별 정렬</li>
               </ul>
               <ul class="ul">
-                <li>argsort로 다른 배열을 같은 순서로 재배열한다</li>
-                <li>시간순 정렬이 깨진 로그를 바로잡을 때 쓴다</li>
+                <li><b>np.unique</b> — 중복을 없앤 정렬된 값</li>
+                <li><b>np.searchsorted(정렬된 배열, 값)</b> — 정렬을 유지하며 값을 넣을 위치를 이진 탐색으로 반환. [1, 3, 5] 에서 4 는 3 과 5 사이이므로 2</li>
+                <li>값을 배열로 주면 위치도 배열로 반환. 시간축 로그에서 특정 시각 구간을 찾을 때 사용</li>
               </ul>
             </div>
           </div>
@@ -897,17 +884,13 @@ np.sort(a)      <span class="c"># [1 2 3]  복사본
                 <h3 class="card-h sky">* 는 요소별 곱 (element-wise)</h3>
                 <pre data-run="" class="code tight">A = np.array([[<span class="no">1</span>, <span class="no">2</span>],
               [<span class="no">3</span>, <span class="no">4</span>]])
-A * A
-<span class="c"># [[ 1  4]
-#  [ 9 16]]</span></pre>
+A * A</pre>
               </div>
               <div class="card soft">
                 <h3 class="card-h sky">@ 는 행렬 곱 (matrix product)</h3>
                 <pre data-run="" class="code on-soft tight">A @ A
-<span class="c"># [[ 7 10]
-#  [15 22]]
 
-</span>A.T        <span class="c"># 전치
+A.T        <span class="c"># 전치
 </span>A.dot(A)   <span class="c"># @ 와 같다</span></pre>
               </div>
             </div>

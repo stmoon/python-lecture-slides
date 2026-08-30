@@ -80,7 +80,6 @@ deck-stage { display: block; }
           <p class="cover-sub">데이터프레임 활용 및 전처리</p>
           <div class="cover-rule"></div>
           <p class="cover-by">충북대학교 지능로봇공학과 <b>문성태 교수</b></p>
-          <p class="cover-host">본 교육은 <b>K-뉴딜 아카데미</b> 교육과정의 일환으로 진행된다</p>
         </section>
 
         <section class="slide" data-label="01 Pandas 소개" data-screen-label="01 Pandas 소개">
@@ -327,7 +326,8 @@ df = df.rename(columns={<span class="s">"temp"</span>: <span class="s">"temp_c"<
                 <li>열 이름은 소문자와 밑줄로 통일</li>
               </ul>
             </div>
-            <pre data-run="" class="code tight">df.columns = df.columns.str.strip().str.lower()   <span class="c"># 열 이름 일괄 정리</span></pre>
+            <pre data-run="" class="code tight"><span class="c"># 열 이름 일괄 정리
+</span>df.columns = df.columns.str.strip().str.lower()</pre>
           </div>
           <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:24%"></i></div><span class="foot-num">09 / 37</span></footer>
         </section>
@@ -460,7 +460,8 @@ df[<span class="s">"temp"</span>].<span class="fn">max</span>()           <span 
                 <li>결측이 몰린 구간이 있는지 시간축으로 확인</li>
               </ul>
             </div>
-            <pre data-run="" class="code tight">df[df.isna().any(axis=<span class="no">1</span>)].head()   <span class="c"># 결측이 있는 행을 직접 들여다본다</span></pre>
+            <pre data-run="" class="code tight"><span class="c"># 결측이 있는 행을 직접 들여다본다
+</span>df[df.isna().any(axis=<span class="no">1</span>)].head()</pre>
           </div>
           <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:38%"></i></div><span class="foot-num">14 / 37</span></footer>
         </section>
@@ -525,15 +526,17 @@ df.loc[20, "temp"] = np.nan
 <span class="c"># 완전히 같은 행의 개수
 
 </span>df = df.drop_duplicates()
+<span class="c"># subset=None, keep="first" 와 같다
 
-df = df.drop_duplicates(
+</span>df = df.drop_duplicates(
     subset=[<span class="s">"t"</span>], keep=<span class="s">"last"</span>)
 <span class="c"># 같은 시각은 마지막 값만 남긴다</span></pre>
               <ul class="ul">
-                <li>subset 으로 <b>중복 판단 기준 열</b>을 지정</li>
-                <li>keep은 first, last, False 중 선택</li>
-                <li>keep=False 는 중복 행을 전부 제거</li>
-                <li>로그 병합 후에는 중복 확인 필수</li>
+                <li><b>인자 없이 호출</b> — subset=None, keep="first" 가 기본값</li>
+                <li>subset=None — 모든 열의 값이 같은 행만 중복으로 판단</li>
+                <li>keep="first" — 첫 행은 남기고 뒤따르는 중복만 제거</li>
+                <li>duplicated() 도 같은 기본값. 첫 행은 False, 이후 중복은 True</li>
+                <li>keep 은 first, last, False 중 선택. False 는 중복 행을 전부 제거</li>
               </ul>
             </div>
             <p class="note">센서 로그에서 <b>같은 타임스탬프가 두 번</b> 나오면 재전송이거나 버퍼 중복. 지우기 전에 원인 확인.</p>
@@ -548,9 +551,8 @@ df = df.drop_duplicates(
           <div class="body">
             <div class="cols">
               <div class="fig-stack" style="gap:20px">
-                <pre data-run class="code xs">raw = pd.Series([<span class="s">"21.5"</span>, <span class="s">"21.6"</span>, <span class="s">"n/a"</span>, <span class="s">"-999"</span>])
+                <pre data-run class="code xs">raw = pd.Series([<span class="s">"21.5"</span>, <span class="s">"n/a"</span>, <span class="s">"-999"</span>])
 num = pd.to_numeric(raw, errors=<span class="s">"coerce"</span>)
-
 <span class="fn">print</span>(num.tolist())
 
 <span class="k">try</span>:
@@ -631,7 +633,9 @@ df.loc[<span class="s">"2026-08-21"</span>]</pre>
                 <li>리샘플링은 반드시 <b>정렬</b> 후에</li>
               </ul>
             </div>
-            <pre data-run="" class="code tight">df[<span class="s">"t"</span>] = pd.to_datetime(df[<span class="s">"t"</span>], unit=<span class="s">"s"</span>, utc=<span class="k">True</span>)   <span class="c"># 유닉스 시각 입력</span></pre>
+            <pre data-run="" class="code tight"><span class="c"># 유닉스 시각 입력
+</span>df[<span class="s">"t"</span>] = pd.to_datetime(
+    df[<span class="s">"t"</span>], unit=<span class="s">"s"</span>, utc=<span class="k">True</span>)</pre>
           </div>
           <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:54%"></i></div><span class="foot-num">20 / 37</span></footer>
         </section>
@@ -641,15 +645,21 @@ df.loc[<span class="s">"2026-08-21"</span>]</pre>
           <h2 class="title">연습문제 3</h2>
           <div class="rule"></div>
           <div class="body">
-            <p class="lead"><code>t</code> 는 유닉스 시각(초)이다. 이를 datetime 인덱스로 바꾼 뒤, <b>하루 중 시(0~23시)별</b> 평균 온도를 구하시오.</p>
+            <p class="lead"><code>t</code> 는 유닉스 시각(초)이다. 이를 datetime 으로 바꿔 인덱스로 두고 정렬한 뒤, <b>2026-08-22 하루치</b>만 잘라 행 수와 <code>temp</code> 평균을 구하시오.</p>
             <div class="cols">
               <pre data-run="" class="code tight">df[["t", "temp"]].head()
 
-<span class="err"># IMPLEMENT HERE</span></pre>
+<span class="c"># 1. t 를 datetime 으로 바꾼다
+# 2. t 를 인덱스로 두고 정렬한다
+# 3. 2026-08-22 하루치만 day 에 담는다
+</span><span class="err"># IMPLEMENT HERE</span>
+
+<span class="fn">len</span>(day), <span class="fn">round</span>(day["temp"].mean(), <span class="no">2</span>)</pre>
               <div class="run-slot"><div data-run-out=""></div></div>
             </div>
-            <p class="note"><strong>데이터</strong> — 2026-08-21 부터 7분 간격 600개, 약 3일치
-            &nbsp;·&nbsp; <strong>기대 출력</strong> — 인덱스가 0 부터 23 인 값 24개짜리 Series. 원자료에 센티널 -999 가 한 개 남아 있어 3시 평균만 음수로 나온다</p>
+            <p class="note"><strong>쓸 함수</strong> — <code>pd.to_datetime(..., unit="s")</code>, <code>set_index</code>, <code>sort_index</code>, <code>loc["날짜"]</code>
+            &nbsp;·&nbsp; <strong>데이터</strong> — 2026-08-21 00:00 부터 7분 간격 602행, 약 3일치
+            &nbsp;·&nbsp; <strong>기대 출력</strong> — <code>(206, 27.85)</code></p>
           </div>
           <script type="text/x-run-setup">
 df = frame.drop(columns=["unused", "a", "b", "tag", "raw", "ax", "ay", "az"]).copy()
@@ -825,9 +835,9 @@ big = df.groupby(<span class="s">"sensor_id"</span>).filter(
           <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:73%"></i></div><span class="foot-num">27 / 37</span></footer>
         </section>
 
-        <section class="slide" data-label="28 피벻과 재구조화" data-screen-label="28 피벻과 재구조화">
+        <section class="slide" data-label="28 피벗과 재구조화" data-screen-label="28 피벗과 재구조화">
           <header class="head"><span class="kicker">Pandas</span><span class="folio">28</span></header>
-          <h2 class="title">피벻과 재구조화</h2>
+          <h2 class="title">피벗과 재구조화</h2>
           <div class="rule"></div>
           <div class="body">
             <div class="cols">
@@ -888,6 +898,7 @@ big = df.groupby(<span class="s">"sensor_id"</span>).filter(
           <h2 class="title">시계열 리샘플링</h2>
           <div class="rule"></div>
           <div class="body">
+            <p class="lead">시간 인덱스를 정해진 간격으로 다시 잘라 구간마다 집계</p>
             <div class="cols">
               <pre data-run="" class="code tight">df = df.set_index(<span class="s">"t"</span>).sort_index()
 
@@ -900,12 +911,12 @@ df[<span class="s">"temp"</span>].resample(<span class="s">"1min"</span>).mean()
 </span>df[<span class="s">"temp"</span>].resample(<span class="s">"1h"</span>).agg(
     [<span class="s">"mean"</span>, <span class="s">"max"</span>, <span class="s">"count"</span>])</pre>
               <ul class="ul">
-                <li>시간 인덱스가 있어야 사용 가능</li>
-                <li>규칙 문자: s, min, h, D, W, M</li>
-                <li>불규칙한 샘플링을 <b>균일한 계열로</b> 바꾸는 도구</li>
-                <li>count 를 함께 보면 빈 구간 발견 가능</li>
+                <li><b>무엇</b> — 시간 간격으로 묶는 groupby</li>
+                <li><b>왜</b> — 흔들리는 로그 간격을 균일하게</li>
+                <li><b>다운샘플링</b> — 줄여서 mean, max</li>
+                <li><b>업샘플링</b> — 늘려서 interpolate</li>
+                <li><b>전제</b> — 시간 인덱스와 정렬</li>
               </ul>
-            </div>
           </div>
           <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:81%"></i></div><span class="foot-num">30 / 37</span></footer>
           <script type="text/x-run-setup">
@@ -933,10 +944,11 @@ df = df.drop_duplicates("t")
 </span>df[<span class="s">"ewm"</span>] = df[<span class="s">"temp"</span>].ewm(span=<span class="no">10</span>).mean()
 <span class="c"># 지수 가중 이동평균</span></pre>
               <ul class="ul">
-                <li>창 크기는 <b>샘플링 주파수 기준</b>으로 결정</li>
-                <li>100Hz에서 1초 평균이면 창 크기는 100</li>
-                <li>min_periods 를 빼면 앞부분이 전부 NaN</li>
-                <li>이동평균은 단순하지만 가장 자주 쓰는 필터</li>
+                <li><b>왜</b> — 연속한 w 개를 평균 내 잡음을 걷음</li>
+                <li><b>이상 감지</b> — 이동 표준편차가 커지면 신호</li>
+                <li><b>resample 과 차이</b> — 행 수는 그대로</li>
+                <li><b>창 크기</b> — 100Hz에서 1초면 100</li>
+                <li>min_periods 없으면 앞부분이 NaN</li>
               </ul>
             </div>
             <p class="note">이동평균은 <b>지연을 만든다는 점에 주의.</b> 실시간 제어에 쓸 때는 지연량을 계산해 보상</p>
