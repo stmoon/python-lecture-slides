@@ -1055,35 +1055,42 @@ a = np.array([1, 2, 3])
           </div>
           <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:97%"></i></div><span class="foot-num">36 / 37</span></footer>
         </section>
+      
 
-        <section class="slide" data-label="37 실습 안내" data-screen-label="37 실습 안내">
-          <header class="head"><span class="kicker">NumPy</span><span class="folio">37</span></header>
-          <h2 class="title">실습 안내 (lab03)</h2>
+        <section class="slide" data-label="37 정리" data-screen-label="37 정리">
+          <header class="head"><span class="kicker">Wrap Up</span><span class="folio">37</span></header>
+          <h2 class="title">정리</h2>
           <div class="rule"></div>
           <div class="body">
-            <div class="cols">
-              <ol class="steps">
-                <li>합성 가속도 3축 배열 생성 (씨드 고정)</li>
-                <li>물리 범위 밖 값을 마스킹으로 걸러내기</li>
-                <li>축별 평균, 표준편차, 최대 가속도 시점</li>
-                <li>5샘플 이동평균로 스무딩</li>
-                <li>회전 행렬로 센서 좌표계 정렬</li>
-              </ol>
-              <div class="card soft">
-                <h3 class="card-h sky">체크포인트</h3>
+            <div class="cols3">
+              <div class="card soft" style="padding:22px 26px">
+                <h3 class="card-h sky">배열</h3>
                 <ul class="ul">
-                  <li>for 루프 없이 작성했는가</li>
-                  <li>원본 배열이 그대로 남아 있는가</li>
-                  <li>결과 shape을 설명할 수 있는가</li>
+                  <li><strong>구조</strong> — 같은 타입이 연속된 메모리에</li>
+                  <li><strong>속성</strong> — shape, dtype, ndim</li>
+                  <li><strong>뷰</strong> — 슬라이스는 복사가 아니다</li>
                 </ul>
-                <div class="chips"><span class="chip sun">30분</span><span class="chip">lab03-numpy.md</span></div>
+              </div>
+              <div class="card" style="padding:22px 26px">
+                <h3 class="card-h">연산</h3>
+                <ul class="ul">
+                  <li><strong>벡터화</strong> — 반복문 대신 배열 단위 계산</li>
+                  <li><strong>브로드캐스팅</strong> — 뒤 축부터 맞춰 늘리기</li>
+                  <li><strong>축</strong> — axis 로 행별, 열별 집계</li>
+                </ul>
+              </div>
+              <div class="card good" style="padding:22px 26px">
+                <h3 class="card-h leaf">다음</h3>
+                <ul class="ul leaf">
+                  <li><strong>선택</strong> — 불리언 마스크와 where</li>
+                  <li><strong>행렬</strong> — @ 연산과 linalg</li>
+                  <li><strong>Pandas</strong> — 이름 붙은 열과 시간 인덱스</li>
+                </ul>
               </div>
             </div>
-            <p class="note">다음: <b>Part 2-3 Pandas</b> — 라벨이 붙은 표 형태 데이터와 전처리.</p>
           </div>
           <footer class="foot"><span class="foot-sec">Part 2-2 NumPy</span><div class="bar"><i style="width:100%"></i></div><span class="foot-num">37 / 37</span></footer>
         </section>
-      
 </deck-stage>
 
 

@@ -1100,36 +1100,43 @@ pd.read_parquet(<span class="s">"clean.parquet"</span>,
           </div>
           <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:97%"></i></div><span class="foot-num">36 / 37</span></footer>
         </section>
+      
 
-        <section class="slide" data-label="37 실습 안내" data-screen-label="37 실습 안내">
-          <header class="head"><span class="kicker">Pandas</span><span class="folio">37</span></header>
-          <h2 class="title">실습 안내 (lab04)</h2>
+        <section class="slide" data-label="37 정리" data-screen-label="37 정리">
+          <header class="head"><span class="kicker">Wrap Up</span><span class="folio">37</span></header>
+          <h2 class="title">정리</h2>
           <div class="rule"></div>
           <div class="body">
-            <div class="cols">
-              <ol class="steps">
-                <li>로그 CSV 적재와 품질 확인</li>
-                <li>열 이름, 자료형, 시간 인덱스 정리</li>
-                <li>결측과 중복 처리</li>
-                <li>센서별 groupby 통계표 만들기</li>
-                <li>1분 단위 리샘플링과 이동평균</li>
-                <li>정제 결과 저장</li>
-              </ol>
-              <div class="card soft">
-                <h3 class="card-h sky">체크포인트</h3>
+            <div class="cols3">
+              <div class="card soft" style="padding:22px 26px">
+                <h3 class="card-h sky">구조</h3>
                 <ul class="ul">
-                  <li>체인 인덱싱 경고 없이 돌아가는가</li>
-                  <li>결측 처리 방식을 설명할 수 있는가</li>
-                  <li>저장 후 다시 읽어도 같은 형태인가</li>
+                  <li><strong>Series</strong> — 인덱스가 붙은 1차원</li>
+                  <li><strong>DataFrame</strong> — 이름 붙은 열의 모음</li>
+                  <li><strong>선택</strong> — loc 는 라벨, iloc 는 위치</li>
                 </ul>
-                <div class="chips"><span class="chip sun">30분</span><span class="chip">lab04-pandas.md</span></div>
+              </div>
+              <div class="card" style="padding:22px 26px">
+                <h3 class="card-h">정제</h3>
+                <ul class="ul">
+                  <li><strong>결측</strong> — isna, dropna, fillna, interpolate</li>
+                  <li><strong>중복</strong> — duplicated, drop_duplicates</li>
+                  <li><strong>자료형</strong> — to_numeric, to_datetime, category</li>
+                </ul>
+              </div>
+              <div class="card good" style="padding:22px 26px">
+                <h3 class="card-h leaf">집계와 저장</h3>
+                <ul class="ul leaf">
+                  <li><strong>묶기</strong> — groupby, agg, pivot_table</li>
+                  <li><strong>시간</strong> — 시간 인덱스, resample, rolling</li>
+                  <li><strong>저장</strong> — to_csv, to_parquet</li>
+                </ul>
               </div>
             </div>
-            <p class="note">다음: <b>Part 2-4 센서 데이터 로그 분석 종합 실습</b> — NumPy 와 Pandas 를 한 파이프라인으로 결합</p>
+            <p class="note"><strong>다음</strong> — Part 2-4 센서 데이터 로그 분석. NumPy 와 Pandas 를 한 파이프라인으로 결합</p>
           </div>
           <footer class="foot"><span class="foot-sec">Part 2-3 Pandas</span><div class="bar"><i style="width:100%"></i></div><span class="foot-num">37 / 37</span></footer>
         </section>
-      
 </deck-stage>
 
 
